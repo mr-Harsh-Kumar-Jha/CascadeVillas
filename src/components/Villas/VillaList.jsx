@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { filterVillas } from '../../firebase/villaService';
 import VillaCard from './VillaCard';
 import VillaFilters from './VillaFilters';
-import Loading from '../common/Loading.jsx';
+import Loading from '../Common/Loading';
 
 const VillaList = ({ onVillaClick }) => {
   const [villas, setVillas] = useState([]);

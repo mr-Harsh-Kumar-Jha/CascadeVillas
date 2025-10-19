@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { getCurrentUser, logOut } from '../../firebase/authService';
 import EnquiryCard from './EnquiryCard';
-import Loading from '../common/Loading';
+import Loading from '../Common/Loading';
 
 const UserDashboard = ({ onLogout }) => {
   const [enquiries, setEnquiries] = useState([]);

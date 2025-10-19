@@ -4,7 +4,7 @@ import { getVillaById } from '../../firebase/villaService';
 import { formatCurrency, calculateDiscountedPrice } from '../../utils/helpers';
 import { AMENITIES_ICONS } from '../../utils/constants';
 import ImageCarousel from '../Common/ImageCarousel';
-import Loading from '../common/Loading';
+import Loading from '../Common/Loading';
 import WhatsAppButton from '../Common/WhatsAppButton';
 
 const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {

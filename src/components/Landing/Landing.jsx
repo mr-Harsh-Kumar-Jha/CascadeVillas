@@ -4,7 +4,7 @@ import { getFeaturedVillas } from '../../firebase/villaService';
 import Home from '../Home/home';
 import VillaCard from '../Villas/VillaCard';
 import TrendingVillas from '../Trending/TrendingVillas';
-import Loading from '../common/Loading';
+import Loading from '../Common/Loading';
 
 const Landing = ({ onVillaClick, onNavigate }) => {
   const [featuredVillas, setFeaturedVillas] = useState([]);

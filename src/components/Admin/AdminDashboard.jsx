@@ -5,7 +5,7 @@ import { db } from '../../firebase/config';
 import { getCurrentUser, logOut } from '../../firebase/authService';
 import { formatDateTime, formatDate } from '../../utils/helpers';
 import { STATUS_COLORS } from '../../utils/constants';
-import Loading from '../common/Loading';
+import Loading from '../Common/Loading';
 
 const AdminDashboard = ({ onLogout }) => {
   const [enquiries, setEnquiries] = useState([]);

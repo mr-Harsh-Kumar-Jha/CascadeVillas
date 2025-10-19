@@ -15,7 +15,7 @@ import UserDashboard from './components/Dashboard/UserDashboard';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import EnquiryModal from './components/Enquiry/EnquiryModal';
 import WhatsAppButton from './components/Common/WhatsAppButton';
-import Loading from './components/common/Loading';
+import Loading from './components/Common/Loading';
 
 function App() {
   // ⚠️ IMPORTANT: Add your admin email addresses here

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTrendingVillas } from '../../firebase/villaService';
 import VillaCard from '../Villas/VillaCard';
-import Loading from '../common/Loading';
+import Loading from '../Common/Loading';
 
 const TrendingVillas = ({ onVillaClick }) => {
   const [villas, setVillas] = useState([]);

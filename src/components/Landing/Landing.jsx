@@ -1,10 +1,9 @@
-// src/components/Landing/Landing.jsx
 import React, { useState, useEffect } from 'react';
 import { getFeaturedVillas } from '../../firebase/villaService';
-import Home from '../Home/home';
 import VillaCard from '../Villas/VillaCard';
 import TrendingVillas from '../Trending/TrendingVillas';
 import Loading from '../Common/Loading';
+import Home from '../Home/Home';
 
 const Landing = ({ onVillaClick, onNavigate }) => {
   const [featuredVillas, setFeaturedVillas] = useState([]);

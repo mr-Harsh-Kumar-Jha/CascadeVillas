@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx - Enhanced with Browser History Management
 import { useState, useEffect } from 'react';
 import './App.css';
 
@@ -14,13 +14,15 @@ import VillaDetail from './components/Villas/VillaDetail';
 import UserDashboard from './components/Dashboard/UserDashboard';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import EnquiryModal from './components/Enquiry/EnquiryModal';
-import WhatsAppButton from './components/Common/WhatsAppButton';
+import SocialMediaButtons from './components/Common/SocialMediaButtons';
 import Loading from './components/Common/Loading';
 
 function App() {
-  // ⚠️ IMPORTANT: Add your admin email addresses here
+  // ADMIN EMAIL ADDRESSES
   const ADMIN_EMAILS = ['contact@cascadevillas.in', 'jhaharsh878@gmail.com', "cascadevillas.lonavala@gmail.com"];
+  
   const [currentPage, setCurrentPage] = useState('home');
+  const [previousPage, setPreviousPage] = useState('home');
   const [selectedVilla, setSelectedVilla] = useState(null);
   const [showEnquiryModal, setShowEnquiryModal] = useState(false);
   const [enquiryVilla, setEnquiryVilla] = useState(null);
@@ -28,6 +30,43 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [historyInitialized, setHistoryInitialized] = useState(false);
+
+  // ===== NEW: Browser History Management =====
+  useEffect(() => {
+    // Initialize history state
+    if (!historyInitialized) {
+      const initialState = {
+        page: 'home',
+        villa: null
+      };
+      window.history.replaceState(initialState, '', window.location.pathname);
+      setHistoryInitialized(true);
+    }
+
+    // Handle browser back/forward buttons
+    const handlePopState = (event) => {
+      if (event.state) {
+        setCurrentPage(event.state.page);
+        setSelectedVilla(event.state.villa);
+        setShowAuthPage(false);
+        setShowEnquiryModal(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [historyInitialized]);
+
+  // Update history when page changes
+  const updateHistory = (page, villa = null) => {
+    const state = { page, villa };
+    const url = villa ? `/${page}/${villa.id}` : `/${page}`;
+    window.history.pushState(state, '', url);
+  };
 
   // Listen for auth state changes
   useEffect(() => {
@@ -50,49 +89,68 @@ function App() {
   const handleNavigate = (page) => {
     // If trying to access dashboard or admin without login
     if ((page === 'dashboard' || page === 'admin') && !user) {
+      setPreviousPage(currentPage);
       setShowAuthPage(true);
       return;
     }
 
+    setPreviousPage(currentPage);
     setCurrentPage(page);
     setSelectedVilla(null);
     setShowAuthPage(false);
+    
+    // Update browser history
+    updateHistory(page);
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleVillaClick = (villa) => {
+    setPreviousPage(currentPage);
     setSelectedVilla(villa);
     setCurrentPage('villa-detail');
+    
+    // Update browser history with villa details
+    updateHistory('villa-detail', villa);
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToList = () => {
     setSelectedVilla(null);
     setCurrentPage('properties');
+    
+    // Update browser history
+    updateHistory('properties');
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleEnquireClick = (villa) => {
-    // Check if user is logged in
-    if (!user) {
-      setShowAuthPage(true);
-      return;
-    }
-
     setEnquiryVilla(villa);
     setShowEnquiryModal(true);
   };
 
   const handleLoginRequired = () => {
+    setPreviousPage(currentPage);
     setShowEnquiryModal(false);
     setShowAuthPage(true);
   };
 
+  const handleAuthBack = () => {
+    setShowAuthPage(false);
+    setCurrentPage(previousPage);
+  };
+
   const handleAuthSuccess = () => {
     setShowAuthPage(false);
-    // If they were trying to access dashboard, go there
-    if (currentPage === 'home') {
+    // If they were trying to access dashboard/admin, go there
+    if (currentPage === 'home' && previousPage === 'dashboard') {
       setCurrentPage('dashboard');
+      updateHistory('dashboard');
+    } else if (currentPage === 'home' && previousPage === 'admin') {
+      setCurrentPage('admin');
+      updateHistory('admin');
     }
   };
 
@@ -100,6 +158,7 @@ function App() {
     setUser(null);
     setIsAdmin(false);
     setCurrentPage('home');
+    updateHistory('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -107,33 +166,36 @@ function App() {
     setShowEnquiryModal(false);
     setEnquiryVilla(null);
     
-    // Navigate to dashboard to see the new enquiry
-    setCurrentPage('dashboard');
-    
-    // Show success message
-    const successDiv = document.createElement('div');
-    successDiv.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-down';
-    successDiv.innerHTML = `
-      <div class="flex items-center gap-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div>
-          <p class="font-semibold">Enquiry Submitted!</p>
-          <p class="text-sm">Check your dashboard to track status.</p>
+    // If user is logged in, navigate to dashboard
+    if (user) {
+      setCurrentPage('dashboard');
+      updateHistory('dashboard');
+      
+      // Show success message
+      const successDiv = document.createElement('div');
+      successDiv.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-down';
+      successDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="font-semibold">Enquiry Submitted!</p>
+            <p class="text-sm">Check your dashboard to track status.</p>
+          </div>
         </div>
-      </div>
-    `;
-    document.body.appendChild(successDiv);
-    
-    setTimeout(() => {
-      successDiv.remove();
-    }, 5000);
+      `;
+      document.body.appendChild(successDiv);
+      
+      setTimeout(() => {
+        successDiv.remove();
+      }, 5000);
+    }
   };
 
   // Show auth page
   if (showAuthPage) {
-    return <AuthPage onSuccess={handleAuthSuccess} />;
+    return <AuthPage onSuccess={handleAuthSuccess} onBack={handleAuthBack} />;
   }
 
   // Show loading while checking auth
@@ -202,8 +264,8 @@ function App() {
         />
       )}
 
-      {/* WhatsApp Button */}
-      <WhatsAppButton />
+      {/* Social Media Buttons */}
+      <SocialMediaButtons />
     </div>
   );
 }

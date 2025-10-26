@@ -79,7 +79,7 @@ const VillaList = ({ onVillaClick }) => {
         </div>
 
         {/* Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
             <VillaFilters 

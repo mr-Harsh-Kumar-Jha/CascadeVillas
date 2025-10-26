@@ -1,5 +1,5 @@
 // WhatsApp Business Number
-export const WHATSAPP_NUMBER = '+919075840173';
+export const WHATSAPP_NUMBER = '+917066670757';
 
 // Locations
 export const LOCATIONS = [

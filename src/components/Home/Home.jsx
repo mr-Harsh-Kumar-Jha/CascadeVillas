@@ -9,13 +9,13 @@ const Home = ({ onNavigate }) => {
                     <div className="space-y-6">
                         <h2 className="text-4xl font-bold text-neutral-800 text-left">
                             About{' '}
-                            <strong style={{ fontFamily: 'Grechen Fuemen, cursive', color: '#892b31' }}>
+                            <strong style={{ color: '#892b31' }}>
                                 Cascade
                             </strong>
                         </h2>
                         <p className="text-lg text-neutral-600 leading-relaxed text-left">
                             At{' '}
-                            <strong style={{ fontFamily: 'Grechen Fuemen, cursive', color: '#892b31' }}>
+                            <strong style={{color: '#892b31' }}>
                                 Cascade
                             </strong>
                             , we redefine luxury stays by offering exquisite villas for holidays, weddings, and homestays. 

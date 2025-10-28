@@ -1,15 +1,15 @@
 // src/components/Admin/AdminDashboard.jsx - FIXED WITH TABS
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { getCurrentUser, logOut } from '../../firebase/authService';
 import { formatDateTime, formatDate } from '../../utils/helpers';
 import { STATUS_COLORS } from '../../utils/constants';
 import Loading from '../Common/Loading';
-import AdminVillaManagement from './AdminVillaManagement'; // ✅ ADDED: Import VillaManagement
+import AdminVillaManagement from './AdminVillaManagement'; // âœ… ADDED: Import VillaManagement
 
 const AdminDashboard = ({ onLogout }) => {
-  // ✅ ADDED: Tab state
+  // âœ… ADDED: Tab state
   const [activeTab, setActiveTab] = useState('enquiries'); // 'enquiries' or 'villas'
   
   const [enquiries, setEnquiries] = useState([]);
@@ -98,7 +98,7 @@ const AdminDashboard = ({ onLogout }) => {
       const enquiryRef = doc(db, 'enquiries', enquiryId);
       await updateDoc(enquiryRef, {
         status: newStatus,
-        updatedAt: new Date()
+        updatedAt: Timestamp.now()
       });
       
       setEnquiries(prev => prev.map(enq => 
@@ -106,9 +106,15 @@ const AdminDashboard = ({ onLogout }) => {
       ));
       
       setSelectedEnquiry(null);
+      
+      // Show success message
+      alert(`Enquiry ${newStatus} successfully!`);
+      
+      // Reload enquiries to ensure consistency
+      await loadAllEnquiries();
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Failed to update status');
+      alert('Failed to update status: ' + error.message);
     } finally {
       setUpdating(false);
     }
@@ -162,7 +168,7 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
       </div>
 
-      {/* ✅ ADDED: Tab Navigation */}
+      {/* âœ… ADDED: Tab Navigation */}
       <div className="bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
@@ -195,7 +201,7 @@ const AdminDashboard = ({ onLogout }) => {
         </div>
       </div>
 
-      {/* ✅ ADDED: Tab Content */}
+      {/* âœ… ADDED: Tab Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'enquiries' ? (
           /* ENQUIRIES TAB CONTENT */
@@ -450,7 +456,7 @@ const AdminDashboard = ({ onLogout }) => {
             )}
           </>
         ) : (
-          /* ✅ VILLA MANAGEMENT TAB CONTENT */
+          /* âœ… VILLA MANAGEMENT TAB CONTENT */
           <AdminVillaManagement />
         )}
       </div>

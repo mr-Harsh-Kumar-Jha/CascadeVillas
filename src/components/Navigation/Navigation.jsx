@@ -1,5 +1,6 @@
 // src/components/Navigation/Navigation.jsx
 import React, { useState, useEffect } from 'react';
+import CascadeLogo from '../../assets/Cascade.jpg';
 
 const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,7 +34,7 @@ const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
           <div className="p-6 border-b border-neutral-200/20">
             <div className="flex items-center gap-3">
               <div className="w-12 h-10 bg-gradient-to-br from-neutral-700 to-neutral-900 rounded-lg flex items-center justify-center">
-                <img className="w-12 h-10" src="src/assets/Cascade.jpg" alt="Cascase"/>
+                <img className="w-12 h-10" src={CascadeLogo} alt="Cascase"/>
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white">

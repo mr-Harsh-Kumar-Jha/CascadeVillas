@@ -3,10 +3,22 @@ import React, { useState } from 'react';
 import { formatDateTime, formatDate } from '../../utils/helpers';
 import { STATUS_COLORS } from '../../utils/constants';
 
-const EnquiryCard = ({ enquiry }) => {
+const EnquiryCard = ({ enquiry, onCancel, showCancelButton = false }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const statusColor = STATUS_COLORS[enquiry.status] || 'bg-neutral-100 text-neutral-800';
+  
+  const handleCancel = async () => {
+    setCancelling(true);
+    try {
+      await onCancel(enquiry.id);
+    } catch (error) {
+      console.error('Error cancelling:', error);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
@@ -84,6 +96,34 @@ const EnquiryCard = ({ enquiry }) => {
                 {enquiry.message}
               </p>
             </div>
+
+            {/* Cancel Button - Only show for pending enquiries */}
+            {showCancelButton && onCancel && enquiry.status === 'pending' && (
+              <div className="pt-3">
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {cancelling ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Cancelling...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Cancel Enquiry
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-neutral-500 text-center mt-2">
+                  Note: Only pending enquiries can be cancelled
+                </p>
+              </div>
+            )}
 
             <div className="pt-3">
               <p className="text-xs text-neutral-500">

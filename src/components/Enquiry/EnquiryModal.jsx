@@ -1,7 +1,8 @@
 // src/components/Enquiry/EnquiryModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { submitEnquiry } from '../../firebase/enquiryService';
 import { getCurrentUser } from '../../firebase/authService';
+import { checkDateConflict } from '../../firebase/bookingService';
 
 const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
   const user = getCurrentUser();
@@ -19,6 +20,60 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showLoginSuggestion, setShowLoginSuggestion] = useState(false);
+  const [dateConflict, setDateConflict] = useState(null);
+  const [checkingDates, setCheckingDates] = useState(false);
+
+  // Check date conflicts whenever dates change
+  useEffect(() => {
+    const checkDates = async () => {
+      if (formData.checkInDate && formData.checkOutDate && villa.id) {
+        // Validate dates first
+        const checkIn = new Date(formData.checkInDate);
+        const checkOut = new Date(formData.checkOutDate);
+        
+        if (checkOut <= checkIn) {
+          setDateConflict({
+            hasConflict: true,
+            message: 'Check-out date must be after check-in date'
+          });
+          return;
+        }
+
+        // Check for conflicts with existing bookings
+        setCheckingDates(true);
+        try {
+          const hasConflict = await checkDateConflict(
+            villa.id,
+            formData.checkInDate,
+            formData.checkOutDate
+          );
+          
+          if (hasConflict) {
+            setDateConflict({
+              hasConflict: true,
+              message: 'These dates are already booked. Please select different dates.'
+            });
+          } else {
+            setDateConflict({
+              hasConflict: false,
+              message: 'Dates are available!'
+            });
+          }
+        } catch (error) {
+          console.error('Error checking date conflict:', error);
+          setDateConflict(null);
+        } finally {
+          setCheckingDates(false);
+        }
+      } else {
+        setDateConflict(null);
+      }
+    };
+
+    // Debounce the date check
+    const timer = setTimeout(checkDates, 500);
+    return () => clearTimeout(timer);
+  }, [formData.checkInDate, formData.checkOutDate, villa.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,6 +118,21 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
       newErrors.message = 'Message is required';
     }
 
+    // Check if dates are provided and valid
+    if (formData.checkInDate && formData.checkOutDate) {
+      const checkIn = new Date(formData.checkInDate);
+      const checkOut = new Date(formData.checkOutDate);
+      
+      if (checkOut <= checkIn) {
+        newErrors.checkOutDate = 'Check-out must be after check-in';
+      }
+    }
+
+    // Check for date conflicts
+    if (dateConflict && dateConflict.hasConflict) {
+      newErrors.dates = dateConflict.message;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,6 +141,12 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
     e.preventDefault();
 
     if (!validate()) return;
+
+    // Double-check date conflict before submitting
+    if (dateConflict && dateConflict.hasConflict) {
+      alert('Cannot submit enquiry: Selected dates are already booked');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -88,12 +164,11 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
         numberOfGuests: formData.numberOfGuests ? parseInt(formData.numberOfGuests) : null,
         message: formData.message.trim(),
         source: 'website',
-        isGuestEnquiry: !user // Track if this was submitted without login
+        isGuestEnquiry: !user
       };
 
       await submitEnquiry(enquiryData);
       
-      // If user is not logged in, show login suggestion
       if (!user) {
         setShowLoginSuggestion(true);
       } else {
@@ -334,6 +409,49 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
               </div>
             </div>
 
+            {/* Date Availability Feedback */}
+            {checkingDates && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <p className="text-sm text-blue-800 font-medium">Checking availability...</p>
+              </div>
+            )}
+
+            {dateConflict && !checkingDates && (
+              <div className={`p-4 border rounded-lg flex items-start gap-3 ${
+                dateConflict.hasConflict 
+                  ? 'bg-red-50 border-red-200' 
+                  : 'bg-green-50 border-green-200'
+              }`}>
+                <svg 
+                  className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                    dateConflict.hasConflict ? 'text-red-600' : 'text-green-600'
+                  }`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  {dateConflict.hasConflict ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  )}
+                </svg>
+                <div>
+                  <p className={`text-sm font-semibold ${
+                    dateConflict.hasConflict ? 'text-red-800' : 'text-green-800'
+                  }`}>
+                    {dateConflict.message}
+                  </p>
+                  {dateConflict.hasConflict && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Please check the calendar above or choose different dates.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Number of Guests */}
             <div>
               <label className="block text-sm font-semibold text-neutral-700 mb-2">
@@ -387,9 +505,9 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-semibold disabled:bg-neutral-400 disabled:cursor-not-allowed"
-              disabled={loading}
+              disabled={loading || checkingDates || (dateConflict && dateConflict.hasConflict)}
             >
-              {loading ? 'Submitting...' : 'Submit Enquiry'}
+              {loading ? 'Submitting...' : checkingDates ? 'Checking...' : 'Submit Enquiry'}
             </button>
           </div>
         </form>

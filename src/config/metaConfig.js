@@ -12,7 +12,7 @@ export const META_CONFIG = {
   // Open Graph / Facebook
   ogTitle: 'Cascade Villas - Luxury Villa Rentals',
   ogDescription: 'Book luxury villas & homestays in Lonavala and Mahabaleshwar for your perfect getaway. Premium properties with pools, gardens & modern amenities.',
-  ogImage: '/Cascade.jpg', // Using the logo from index.html
+  ogImage: '../assets/Cascade.jpg', // Using the logo from index.html
   ogType: 'website',
   ogLocale: 'en_US',
   
@@ -20,7 +20,7 @@ export const META_CONFIG = {
   twitterCard: 'summary_large_image',
   twitterTitle: 'Cascade Villas - Luxury Villa Rentals',
   twitterDescription: 'Book luxury villas & homestays in Lonavala and Mahabaleshwar. Premium amenities, verified properties, 24/7 support.',
-  twitterImage: '/Cascade.jpg',
+  twitterImage: '../assets/Cascade.jpg',
   
   // SEO Settings
   robotsMeta: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
@@ -33,13 +33,13 @@ export const META_CONFIG = {
   
   // Contact Information
   businessEmail: 'contact@cascadevillas.in',
-  businessPhone: '+91-XXXXXXXXXX', // Update with actual phone
+  businessPhone: '+91 7066670757', // Update with actual phone
   
   // Social Media (Update with actual URLs)
   socialMedia: {
-    instagram: 'https://instagram.com/cascadevillas',
-    facebook: 'https://facebook.com/cascadevillas',
-    whatsapp: '+919322299595'
+    instagram: 'https://www.instagram.com/cascade.villas/?igsh=MWNxaW9nYjRia29wZQ%3D%3D',
+    facebook: 'https://www.facebook.com/people/Cascade-Villas-Homestay/61579758807827/',
+    whatsapp: '+91 7066670757'
   }
 };
 

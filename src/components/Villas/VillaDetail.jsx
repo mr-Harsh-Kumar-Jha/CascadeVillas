@@ -8,6 +8,7 @@ import { AMENITIES_ICONS } from '../../utils/constants';
 import ImageCarousel from '../Common/ImageCarousel';
 import Loading from '../Common/Loading';
 import BookingCalendar from "../Booking/BookingCalender";
+import WhatsAppButton from '../Common/WhatsAppButton';
 
 const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
   const [villa, setVilla] = useState(null);
@@ -309,10 +310,12 @@ const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
               {/* Enquire Button */}
               <button
                 onClick={() => onEnquireClick(villa)}
-                className="w-full px-6 py-4 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
+                className="w-full px-6 py-4 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl mb-4"
               >
                 Enquire Now
               </button>
+
+              <WhatsAppButton villaName={villa.villaName} />
 
               <p className="text-xs text-neutral-500 text-center mt-4">
                 You won't be charged yet. Our team will contact you with availability.

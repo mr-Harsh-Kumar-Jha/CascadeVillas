@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { getCurrentUser, logOut } from '../../firebase/authService';
+import { cancelEnquiry } from '../../firebase/bookingService';
 import EnquiryCard from './EnquiryCard';
 import Loading from '../Common/Loading';
 
@@ -57,6 +58,24 @@ const UserDashboard = ({ onLogout }) => {
       setError('Failed to load enquiries: ' + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelEnquiry = async (enquiryId) => {
+    if (!window.confirm('Are you sure you want to cancel this enquiry?')) {
+      return;
+    }
+
+    try {
+      await cancelEnquiry(enquiryId);
+      alert('Enquiry cancelled successfully!');
+      // Reload enquiries
+      if (user) {
+        await loadUserEnquiries(user.email);
+      }
+    } catch (error) {
+      console.error('Error cancelling enquiry:', error);
+      alert('Failed to cancel enquiry. Please try again.');
     }
   };
 
@@ -198,7 +217,12 @@ const UserDashboard = ({ onLogout }) => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {enquiries.map((enquiry) => (
-                <EnquiryCard key={enquiry.id} enquiry={enquiry} />
+                <EnquiryCard 
+                  key={enquiry.id} 
+                  enquiry={enquiry} 
+                  onCancel={handleCancelEnquiry}
+                  showCancelButton={true}
+                />
               ))}
             </div>
           </div>

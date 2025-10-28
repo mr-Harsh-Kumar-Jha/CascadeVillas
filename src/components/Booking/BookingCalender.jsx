@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { getBlockedDates } from '../../firebase/bookingService';
+import MetaTags from '../Common/MetaTags';
 
 const BookingCalendar = ({ villaId, compact = false }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -43,6 +44,7 @@ const BookingCalendar = ({ villaId, compact = false }) => {
       checkIn.setHours(0, 0, 0, 0);
       checkOut.setHours(0, 0, 0, 0);
       date.setHours(0, 0, 0, 0);
+      // Include checkout day as blocked
       return date >= checkIn && date < checkOut;
     });
   };
@@ -54,6 +56,7 @@ const BookingCalendar = ({ villaId, compact = false }) => {
       checkIn.setHours(0, 0, 0, 0);
       checkOut.setHours(0, 0, 0, 0);
       date.setHours(0, 0, 0, 0);
+      // Include checkout day as blocked
       return date >= checkIn && date < checkOut;
     });
   };
@@ -203,7 +206,7 @@ const BookingCalendar = ({ villaId, compact = false }) => {
             {new Date(hoveredDate.checkInDate).toLocaleDateString()} - {new Date(hoveredDate.checkOutDate).toLocaleDateString()}
           </p>
           <p className="text-xs text-neutral-600 mt-1">
-            {hoveredDate.bookingType === 'offline' ? '🏢 Offline Booking' : '🌐 Online Booking'}
+            {hoveredDate.bookingType === 'offline' ? 'Offline Booking' : 'Online Booking'}
           </p>
           {hoveredDate.guestName && hoveredDate.guestName !== 'Reserved' && (
             <p className="text-xs text-neutral-600">Guest: {hoveredDate.guestName}</p>

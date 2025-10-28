@@ -8,12 +8,50 @@ import {
   doc,
   query,
   where,
-  orderBy,
   Timestamp
 } from 'firebase/firestore';
 import { db } from './config';
 
 const ENQUIRIES_COLLECTION = 'enquiries';
+
+/**
+ * Helper function to safely convert various date formats to JavaScript Date
+ * Handles: Firestore Timestamps, Date objects, ISO strings, null/undefined
+ * @param {any} dateValue - The date value from Firestore
+ * @returns {Date|null} JavaScript Date object or null
+ */
+const safeConvertToDate = (dateValue) => {
+  if (!dateValue) return null;
+  
+  // If it's already a Date object
+  if (dateValue instanceof Date) {
+    return dateValue;
+  }
+  
+  // If it's a Firestore Timestamp
+  if (dateValue && typeof dateValue.toDate === 'function') {
+    return dateValue.toDate();
+  }
+  
+  // If it's a string (ISO format or date string) - THIS IS YOUR CASE
+  if (typeof dateValue === 'string') {
+    const parsed = new Date(dateValue);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+  
+  // If it's a number (Unix timestamp in milliseconds)
+  if (typeof dateValue === 'number') {
+    return new Date(dateValue);
+  }
+  
+  // If it's an object with seconds (Firestore Timestamp-like)
+  if (dateValue && typeof dateValue === 'object' && 'seconds' in dateValue) {
+    return new Date(dateValue.seconds * 1000);
+  }
+  
+  console.warn('Unknown date format:', dateValue);
+  return null;
+};
 
 /**
  * Get all confirmed enquiries (bookings) for a specific villa
@@ -23,24 +61,38 @@ const ENQUIRIES_COLLECTION = 'enquiries';
 export const getVillaBookings = async (villaId) => {
   try {
     const enquiriesRef = collection(db, ENQUIRIES_COLLECTION);
+    // FIXED: Removed orderBy to avoid index requirement
     const q = query(
       enquiriesRef,
       where('villaId', '==', villaId),
-      where('status', '==', 'confirmed'), // Only confirmed enquiries = bookings
-      orderBy('checkInDate', 'asc')
+      where('status', '==', 'confirmed')
     );
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      checkInDate: doc.data().checkInDate?.toDate(),
-      checkOutDate: doc.data().checkOutDate?.toDate(),
-      createdAt: doc.data().createdAt?.toDate()
-    }));
+    const bookings = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        checkInDate: safeConvertToDate(data.checkInDate),
+        checkOutDate: safeConvertToDate(data.checkOutDate),
+        createdAt: safeConvertToDate(data.createdAt)
+      };
+    });
+    
+    // Sort in memory by checkInDate ascending
+    bookings.sort((a, b) => {
+      const dateA = a.checkInDate ? a.checkInDate.getTime() : 0;
+      const dateB = b.checkInDate ? b.checkInDate.getTime() : 0;
+      return dateA - dateB;
+    });
+    
+    console.log(`✅ Loaded ${bookings.length} confirmed bookings for villa ${villaId}`);
+    return bookings;
   } catch (error) {
     console.error('Error fetching villa bookings:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent UI breaks
+    return [];
   }
 };
 
@@ -51,23 +103,35 @@ export const getVillaBookings = async (villaId) => {
 export const getAllBookings = async () => {
   try {
     const enquiriesRef = collection(db, ENQUIRIES_COLLECTION);
+    // FIXED: Removed orderBy to avoid index requirement
     const q = query(
       enquiriesRef,
-      where('status', '==', 'confirmed'),
-      orderBy('checkInDate', 'desc')
+      where('status', '==', 'confirmed')
     );
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      checkInDate: doc.data().checkInDate?.toDate(),
-      checkOutDate: doc.data().checkOutDate?.toDate(),
-      createdAt: doc.data().createdAt?.toDate()
-    }));
+    const bookings = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        checkInDate: safeConvertToDate(data.checkInDate),
+        checkOutDate: safeConvertToDate(data.checkOutDate),
+        createdAt: safeConvertToDate(data.createdAt)
+      };
+    });
+    
+    // Sort in memory by checkInDate descending
+    bookings.sort((a, b) => {
+      const dateA = a.checkInDate ? a.checkInDate.getTime() : 0;
+      const dateB = b.checkInDate ? b.checkInDate.getTime() : 0;
+      return dateB - dateA;
+    });
+    
+    return bookings;
   } catch (error) {
     console.error('Error fetching all bookings:', error);
-    throw error;
+    return [];
   }
 };
 
@@ -136,8 +200,8 @@ export const getConflictingEnquiries = async (villaId, checkInDate, checkOutDate
       }
       
       const data = doc.data();
-      const enquiryCheckIn = data.checkInDate?.toDate();
-      const enquiryCheckOut = data.checkOutDate?.toDate();
+      const enquiryCheckIn = safeConvertToDate(data.checkInDate);
+      const enquiryCheckOut = safeConvertToDate(data.checkOutDate);
       
       // Check for overlap
       if (enquiryCheckIn && enquiryCheckOut) {
@@ -147,7 +211,7 @@ export const getConflictingEnquiries = async (villaId, checkInDate, checkOutDate
             ...data,
             checkInDate: enquiryCheckIn,
             checkOutDate: enquiryCheckOut,
-            createdAt: data.createdAt?.toDate()
+            createdAt: safeConvertToDate(data.createdAt)
           });
         }
       }

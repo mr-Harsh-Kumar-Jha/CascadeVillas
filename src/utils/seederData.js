@@ -233,8 +233,7 @@ const sampleVillas = [
 ];
 
 export const seedVillas = async () => {
-  try {
-    console.log('Starting to seed villas...');
+  try {;
     const villasRef = collection(db, 'villas');
     
     for (const villa of sampleVillas) {
@@ -243,10 +242,8 @@ export const seedVillas = async () => {
         createdAt: new Date(),
         updatedAt: new Date()
       });
-      console.log(`Added: ${villa.name}`);
     }
     
-    console.log('✅ Successfully seeded all villas!');
     return true;
   } catch (error) {
     console.error('Error seeding villas:', error);

@@ -26,17 +26,14 @@ const Home = ({ onNavigate }) => {
                         {/* Statistics Grid */}
                         <div className="grid grid-cols-2 gap-6 mt-8">
                             <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-200">
-                                <div className="text-3xl font-bold text-neutral-800 mb-2">1000+</div>
+                                <div className="text-3xl font-bold text-neutral-800 mb-2">50+</div>
                                 <div className="text-neutral-600">Properties Listed</div>
                             </div>
                             <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-200">
                                 <div className="text-3xl font-bold text-neutral-800 mb-2">500+</div>
                                 <div className="text-neutral-600">Happy Clients</div>
                             </div>
-                            <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-200">
-                                <div className="text-3xl font-bold text-neutral-800 mb-2">50+</div>
-                                <div className="text-neutral-600">Cities Covered</div>
-                            </div>
+
                             <div className="bg-neutral-50 p-6 rounded-lg border border-neutral-200">
                                 <div className="text-3xl font-bold text-neutral-800 mb-2">24/7</div>
                                 <div className="text-neutral-600">Support Available</div>

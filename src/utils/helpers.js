@@ -18,7 +18,15 @@ export const formatDate = (date) => {
   if (!date) return '';
   
   try {
-    const d = date instanceof Date ? date : new Date(date);
+    let d;
+    if (date.toDate && typeof date.toDate === 'function') {
+      d = date.toDate(); // Firestore Timestamp
+    } else if (date instanceof Date) {
+      d = date;
+    } else {
+      d = new Date(date);
+    }
+    
     if (isNaN(d.getTime())) return '';
     
     return new Intl.DateTimeFormat('en-IN', {
@@ -31,6 +39,8 @@ export const formatDate = (date) => {
     return String(date);
   }
 };
+
+
 
 // Format date and time
 export const formatDateTime = (date) => {

@@ -26,19 +26,14 @@ const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading villa with ID:', villaId); // Debug log
-      
       // Load villa details
       const villaData = await getVillaById(villaId);
-      console.log('Villa data loaded:', villaData); // Debug log
       setVilla(villaData);
       
       // Load booking dates
       const dates = await getBlockedDates(villaId);
-      console.log('Blocked dates loaded:', dates); // Debug log
       setBlockedDates(dates);
     } catch (err) {
-      console.error('Error loading villa:', err);
       setError(err.message || 'Failed to load villa details');
     } finally {
       setLoading(false);

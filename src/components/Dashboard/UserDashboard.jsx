@@ -15,7 +15,6 @@ const UserDashboard = ({ onLogout }) => {
 
   useEffect(() => {
     const currentUser = getCurrentUser();
-    console.log('Current user:', currentUser); // Debug log
     if (currentUser) {
       setUser(currentUser);
       loadUserEnquiries(currentUser.email);
@@ -30,8 +29,6 @@ const UserDashboard = ({ onLogout }) => {
       setLoading(true);
       setError(null);
       
-      console.log('Loading enquiries for email:', email); // Debug log
-      
       const enquiriesRef = collection(db, 'enquiries');
       const q = query(
         enquiriesRef,
@@ -39,11 +36,9 @@ const UserDashboard = ({ onLogout }) => {
       );
       
       const snapshot = await getDocs(q);
-      console.log('Found documents:', snapshot.size); // Debug log
       
       const data = snapshot.docs.map(doc => {
         const docData = doc.data();
-        console.log('Document data:', docData); // Debug log
         return {
           id: doc.id,
           ...docData,
@@ -51,7 +46,6 @@ const UserDashboard = ({ onLogout }) => {
         };
       });
       
-      console.log('Processed enquiries:', data); // Debug log
       setEnquiries(data);
     } catch (error) {
       console.error('Error fetching enquiries:', error);

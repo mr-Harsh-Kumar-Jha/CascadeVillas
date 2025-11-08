@@ -94,7 +94,6 @@ export const submitEnquiry = async (enquiryData) => {
     }
     
     const docRef = await addDoc(enquiriesRef, dataToSubmit);
-    console.log('Enquiry submitted with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
     console.error('Error submitting enquiry:', error);

@@ -10,43 +10,59 @@ const GoogleReviewsCarousel = () => {
   const reviews = [
     {
       id: 1,
-      name: 'John Doe',
+      name: 'Santosh Pawar',
       rating: 5,
-      date: '2 weeks ago',
-      text: 'Amazing experience! The villa was spacious, clean, and had all the amenities we needed. The view was breathtaking. Highly recommend for family vacations!',
-      avatar: 'JD'
+      date: '1 month ago',
+      text: 'Had a great stay at their property. Sudhanshu and his team is very cooperative. Will surely visit again 👍',
+      avatar: 'SP',
+      rooms: 5,
+      services: 5,
+      location: 5
+
     },
     {
       id: 2,
-      name: 'Sarah Smith',
+      name: 'Sanket Dalvi',
       rating: 5,
       date: '1 month ago',
-      text: 'Perfect weekend getaway! The staff was extremely helpful and the property was well-maintained. The pool area was beautiful. Will definitely come back!',
-      avatar: 'SS'
+      text: 'I was with 32 people and they easily handles the large count..food made by them is really good 10/10..clean pools and large parking space.',
+      avatar: 'SD',
+      rooms: 5,
+      services: 5,
+      location: 5
     },
     {
       id: 3,
-      name: 'Rajesh Kumar',
+      name: 'Siddharth Bhandare',
       rating: 5,
       date: '3 weeks ago',
-      text: 'Excellent service and beautiful villas. We celebrated our anniversary here and it was magical. The location is perfect for a peaceful retreat.',
-      avatar: 'RK'
+      text: 'I had been with my family on cascade villa located in Lonavala . We had a fun stay over at their property.',
+      avatar: 'SB',
+      rooms: 5,
+      services: 5,
+      location: 5
     },
     {
       id: 4,
-      name: 'Emily Johnson',
+      name: 'Sushant Jadhav',
       rating: 4,
       date: '2 months ago',
-      text: 'Great place for a family reunion. The villa had plenty of space for everyone. Minor issue with Wi-Fi but overall fantastic stay!',
-      avatar: 'EJ'
+      text: 'Loved the food. it was really tasty! Great atmosphere and good service too.',
+      avatar: 'SJ',
+      rooms: 5,
+      services: 4,
+      location: 4
     },
     {
       id: 5,
-      name: 'Priya Sharma',
+      name: 'Himanshu Mandiya',
       rating: 5,
       date: '1 week ago',
-      text: 'Best villa rental experience ever! The booking process was smooth, and the property exceeded our expectations. Perfect for corporate retreats too!',
-      avatar: 'PS'
+      text: 'It was an amazing experience, the villa was great. Rooms were very clean. The decorations they did was outstanding. Loved it. Service was superb. Will definitely recommend to go and book your villas from Sudhanshu. He is very nice and supportive person. Made very nice arrangements.',
+      avatar: 'HM',
+      rooms: 5,
+      services: 4,
+      location: 4
     }
   ];
 
@@ -110,7 +126,7 @@ const GoogleReviewsCarousel = () => {
           
           {/* Google Reviews Link */}
           <a
-            href="https://www.google.com/maps/search/?api=1&query=Cascade+Villas"
+            href="https://share.google/5OEOuaF0JXt770NGA"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-medium"
@@ -142,6 +158,18 @@ const GoogleReviewsCarousel = () => {
               <p className="text-neutral-700 text-lg leading-relaxed mb-6">
                 "{reviews[currentReview].text}"
               </p>
+
+              <div className="flex items-center bg-gray-200 p-4 rounded-lg gap-6 align-center justify-center">
+                <p className="text-neutral-700 text-lg leading-relaxed mb-6">
+                <strong> Rooms: </strong> {reviews[currentReview].rooms} / 5
+              </p>
+              <p className="text-neutral-700 text-lg leading-relaxed mb-6">
+                &#124;  <strong>Services:</strong> {reviews[currentReview].services} / 5
+              </p>
+              <p className="text-neutral-700 text-lg leading-relaxed mb-6">
+                &#124;  <strong>Location: </strong> {reviews[currentReview].location} / 5
+              </p>
+              </div>
             </div>
 
             {/* Reviewer Info */}

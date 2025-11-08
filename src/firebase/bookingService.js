@@ -87,7 +87,6 @@ export const getVillaBookings = async (villaId) => {
       return dateA - dateB;
     });
     
-    console.log(`✅ Loaded ${bookings.length} confirmed bookings for villa ${villaId}`);
     return bookings;
   } catch (error) {
     console.error('Error fetching villa bookings:', error);

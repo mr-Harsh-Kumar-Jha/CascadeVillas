@@ -63,7 +63,7 @@ const SocialMediaButtons = ({ villaName = null }) => {
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-40">
       <div className="relative flex flex-col items-end gap-2.5">
         {/* Expanded Action Menu */}
         <div 

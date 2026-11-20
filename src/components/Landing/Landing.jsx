@@ -79,10 +79,11 @@ const Landing = ({ onVillaClick, onNavigate }) => {
           </p>
 
           {/* Floating Glass Search & Quick Action Bar */}
-          <div className="w-full max-w-3xl bg-white/95 dark:bg-neutral-950/80 p-3 sm:p-4 rounded-3xl border border-neutral-200/90 dark:border-white/15 shadow-2xl backdrop-blur-2xl flex flex-col sm:flex-row gap-3 items-center">
-            <div className="flex-1 w-full text-left px-3">
-              <span className="block text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5">
-                Destination
+          <div className="w-full max-w-3xl glass-card bg-white/90 dark:bg-neutral-950/85 p-3.5 sm:p-4 rounded-3xl border border-neutral-200/90 dark:border-white/15 shadow-2xl backdrop-blur-2xl flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-center">
+            <div className="flex-1 w-full text-left px-3.5 py-2.5 sm:py-0 rounded-2xl sm:rounded-none bg-neutral-100/70 sm:bg-transparent dark:bg-white/5 sm:dark:bg-transparent border border-neutral-200/60 sm:border-none dark:border-white/5">
+              <span className="block text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5 flex items-center gap-1">
+                <span>📍</span>
+                <span>Destination</span>
               </span>
               <select 
                 value={heroLocation} 
@@ -97,9 +98,10 @@ const Landing = ({ onVillaClick, onNavigate }) => {
 
             <div className="hidden sm:block w-[1px] h-10 bg-neutral-200 dark:bg-white/20" />
 
-            <div className="flex-1 w-full text-left px-3">
-              <span className="block text-[10px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-0.5">
-                Bedrooms / Space
+            <div className="flex-1 w-full text-left px-3.5 py-2.5 sm:py-0 rounded-2xl sm:rounded-none bg-neutral-100/70 sm:bg-transparent dark:bg-white/5 sm:dark:bg-transparent border border-neutral-200/60 sm:border-none dark:border-white/5">
+              <span className="block text-[10px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400 mb-0.5 flex items-center gap-1">
+                <span>🛏️</span>
+                <span>Bedrooms / Space</span>
               </span>
               <select 
                 value={heroBedrooms} 
@@ -116,9 +118,10 @@ const Landing = ({ onVillaClick, onNavigate }) => {
 
             <button
               onClick={handleHeroSearch}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-extrabold text-sm transition-all shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 shrink-0"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-neutral-950 font-black text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/25 hover:scale-105 active:scale-95 shrink-0 flex items-center justify-center gap-2"
             >
-              Explore Villas
+              <span>Explore Villas</span>
+              <span>→</span>
             </button>
           </div>
 

@@ -105,7 +105,7 @@ const UserDashboard = ({ onLogout }) => {
   }
 
   return (
-    <section id="dashboard" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <section id="dashboard" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen pb-28 lg:pb-16">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header Bar */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-neutral-200/80 dark:border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">

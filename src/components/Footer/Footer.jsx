@@ -5,7 +5,7 @@ import { CONCIERGE_INFO } from '../../utils/constants';
 
 const Footer = ({ onNavigate }) => {
   return (
-    <footer className="mt-20 border-t border-neutral-200 dark:border-white/10 bg-neutral-100/70 dark:bg-neutral-950/80 backdrop-blur-xl transition-colors duration-300">
+    <footer className="mt-20 border-t border-neutral-200 dark:border-white/10 bg-neutral-100/70 dark:bg-neutral-950/80 backdrop-blur-xl transition-colors duration-300 pb-28 lg:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12 text-left">
           {/* Brand Info */}

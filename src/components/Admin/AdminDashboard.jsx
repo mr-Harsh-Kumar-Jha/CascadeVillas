@@ -137,7 +137,7 @@ const AdminDashboard = ({ onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8 pb-28 lg:pb-12">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Glass Header Bar */}
         <div className="glass-panel rounded-3xl p-6 border border-neutral-200/80 dark:border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">

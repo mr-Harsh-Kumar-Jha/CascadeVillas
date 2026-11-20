@@ -87,7 +87,7 @@ const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 lg:pb-12">
         {/* Photo Gallery Showcase */}
         <div className="mb-10 rounded-3xl overflow-hidden glass-panel border border-neutral-200/80 dark:border-white/10 shadow-2xl">
           <ImageCarousel images={villa.images} alt={villa.name} />
@@ -313,6 +313,41 @@ const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Frosted Glass Booking Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 mobile-glass-dock border-t border-neutral-200/80 dark:border-white/10 p-3 sm:p-4 backdrop-blur-2xl flex items-center justify-between gap-4 shadow-2xl">
+        <div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-lg font-extrabold text-neutral-900 dark:text-white font-serif">
+              ₹{discountedPrice?.toLocaleString()}
+            </span>
+            <span className="text-[11px] text-neutral-500">/ night</span>
+          </div>
+          {villa.discountPercentage > 0 && (
+            <span className="text-[10px] font-bold text-emerald-500">
+              {villa.discountPercentage}% OFF Active
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <a
+            href={`https://wa.me/${CONCIERGE_INFO.phoneClean}?text=${encodeURIComponent(`Hi, I am interested in ${villa.name || 'this villa'}. Can you share details?`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-3 rounded-2xl bg-[#25D366] text-neutral-950 font-bold shadow-md active:scale-95 transition-transform"
+            title="Chat on WhatsApp"
+          >
+            💬
+          </a>
+          <button
+            onClick={() => onEnquireClick(villa)}
+            className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/25 active:scale-95 transition-transform"
+          >
+            Reserve / Enquire
+          </button>
         </div>
       </div>
     </div>

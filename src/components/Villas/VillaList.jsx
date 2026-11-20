@@ -78,7 +78,7 @@ const VillaList = ({ onVillaClick, initialFilters }) => {
   }
 
   return (
-    <section id="properties" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <section id="properties" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen pb-28 lg:pb-16">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-10 text-left flex flex-col md:flex-row md:items-end justify-between gap-4">

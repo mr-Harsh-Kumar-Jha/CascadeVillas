@@ -10,10 +10,10 @@ import { DEVELOPER_INFO } from '../../utils/constants';
 const HologramBadge = () => {
   return (
     <div 
-      className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full 
+      className="inline-flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2 sm:py-1.5 rounded-2xl sm:rounded-full 
                  bg-[#0a0f1d] text-white 
                  border border-slate-700/60 hover:border-slate-600
-                 shadow-md backdrop-blur-md transition-all duration-200"
+                 shadow-md backdrop-blur-md transition-all duration-200 max-w-full"
     >
       {/* Blue Dot */}
       <span className="inline-block h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6] shrink-0" />

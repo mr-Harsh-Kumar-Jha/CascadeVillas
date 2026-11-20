@@ -139,3 +139,23 @@ export const scrollToElement = (elementId) => {
     element.scrollIntoView({ behavior: 'smooth' });
   }
 };
+
+// Reliable top scroll reset across mobile and desktop
+export const scrollToTop = (instant = true) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: instant ? 'instant' : 'smooth',
+    });
+  } catch {
+    window.scrollTo(0, 0);
+  }
+  if (document.documentElement) {
+    document.documentElement.scrollTop = 0;
+  }
+  if (document.body) {
+    document.body.scrollTop = 0;
+  }
+};

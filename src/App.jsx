@@ -19,6 +19,7 @@ import Footer from './components/Footer/Footer';
 import TermsOfService from './components/Legal/TermsOfService';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import Loading from './components/Common/Loading';
+import { scrollToTop } from './utils/helpers';
 
 // Registered Admin Email Addresses
 const ADMIN_EMAILS = [
@@ -108,7 +109,7 @@ function App() {
     setShowAuthPage(false);
     
     updateHistory(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop(true);
   };
 
   const handleVillaClick = (villa) => {
@@ -117,14 +118,14 @@ function App() {
     setCurrentPage('villa-detail');
     
     updateHistory('villa-detail', villa);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop(true);
   };
 
   const handleBackToList = () => {
     setSelectedVilla(null);
     setCurrentPage('properties');
     updateHistory('properties');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop(true);
   };
 
   const handleEnquireClick = (villa) => {
@@ -159,7 +160,7 @@ function App() {
     setIsAdmin(false);
     setCurrentPage('home');
     updateHistory('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop(true);
   };
 
   const handleEnquirySuccess = () => {

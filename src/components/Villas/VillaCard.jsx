@@ -1,6 +1,6 @@
 // src/components/Villas/VillaCard.jsx
 import React, { useEffect, useState } from "react";
-import { formatCurrency } from "../../utils/helpers";
+import { formatCurrency, scrollToTop } from "../../utils/helpers";
 import { AMENITIES_ICONS } from "../../utils/constants";
 import { getBlockedDates } from "../../firebase/bookingService";
 
@@ -34,7 +34,10 @@ const VillaCard = ({ villa, onClick }) => {
 
   return (
     <div
-      onClick={() => onClick(villa)}
+      onClick={() => {
+        scrollToTop(true);
+        onClick(villa);
+      }}
       onMouseEnter={() => setShowBookingInfo(true)}
       onMouseLeave={() => setShowBookingInfo(false)}
       className="glass-card rounded-3xl overflow-hidden cursor-pointer group relative flex flex-col justify-between"
@@ -149,6 +152,7 @@ const VillaCard = ({ villa, onClick }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              scrollToTop(true);
               onClick(villa);
             }}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-neutral-950 transition-all shadow-md group-hover:shadow-lg group-hover:scale-105"
@@ -218,6 +222,7 @@ const VillaCard = ({ villa, onClick }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              scrollToTop(true);
               onClick(villa);
             }}
             className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 text-xs font-bold transition-all shadow-lg"

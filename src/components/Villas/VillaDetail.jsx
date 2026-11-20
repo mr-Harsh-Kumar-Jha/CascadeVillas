@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getVillaById } from '../../firebase/villaService';
 import { getBlockedDates } from '../../firebase/bookingService';
-import { formatCurrency } from '../../utils/helpers';
+import { formatCurrency, scrollToTop } from '../../utils/helpers';
 import { AMENITIES_ICONS, CONCIERGE_INFO } from '../../utils/constants';
 import ImageCarousel from '../Common/ImageCarousel';
 import Loading from '../Common/Loading';
@@ -18,8 +18,22 @@ const VillaDetail = ({ villaId, onEnquireClick, onBack }) => {
   const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
+    scrollToTop(true);
     loadVillaData();
   }, [villaId]);
+
+  // Ensure user is taken to the top of the screen when villa details finish loading on mobile
+  useEffect(() => {
+    if (!loading) {
+      scrollToTop(true);
+      const raf = requestAnimationFrame(() => scrollToTop(true));
+      const timer = setTimeout(() => scrollToTop(true), 50);
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(timer);
+      };
+    }
+  }, [loading]);
 
   const loadVillaData = async () => {
     try {

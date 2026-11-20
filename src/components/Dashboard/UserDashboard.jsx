@@ -1,6 +1,6 @@
 // src/components/Dashboard/UserDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { getCurrentUser, logOut } from '../../firebase/authService';
 import { cancelEnquiry } from '../../firebase/bookingService';
@@ -36,7 +36,6 @@ const UserDashboard = ({ onLogout }) => {
       );
       
       const snapshot = await getDocs(q);
-      
       const data = snapshot.docs.map(doc => {
         const docData = doc.data();
         return {
@@ -46,10 +45,11 @@ const UserDashboard = ({ onLogout }) => {
         };
       });
       
+      data.sort((a, b) => b.createdAt - a.createdAt);
       setEnquiries(data);
-    } catch (error) {
-      console.error('Error fetching enquiries:', error);
-      setError('Failed to load enquiries: ' + error.message);
+    } catch (err) {
+      console.error('Error fetching enquiries:', err);
+      setError('Failed to load enquiries: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -62,13 +62,11 @@ const UserDashboard = ({ onLogout }) => {
 
     try {
       await cancelEnquiry(enquiryId);
-      alert('Enquiry cancelled successfully!');
-      // Reload enquiries
       if (user) {
         await loadUserEnquiries(user.email);
       }
-    } catch (error) {
-      console.error('Error cancelling enquiry:', error);
+    } catch (err) {
+      console.error('Error cancelling enquiry:', err);
       alert('Failed to cancel enquiry. Please try again.');
     }
   };
@@ -77,27 +75,27 @@ const UserDashboard = ({ onLogout }) => {
     try {
       await logOut();
       onLogout();
-    } catch (error) {
-      console.error('Error logging out:', error);
+    } catch (err) {
+      console.error('Error logging out:', err);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading text="Loading dashboard..." />
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Loading text="Loading your guest dashboard..." />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass-card rounded-3xl p-8 max-w-md text-center border border-neutral-200 dark:border-white/10 shadow-xl">
+          <p className="text-sm font-semibold text-rose-500 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700"
+            className="px-6 py-2.5 bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold text-xs rounded-xl"
           >
             Retry
           </button>
@@ -106,119 +104,82 @@ const UserDashboard = ({ onLogout }) => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-neutral-600 mb-4">Please login to view your dashboard</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <section id="dashboard" className="py-16 min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <section id="dashboard" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header Bar */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-neutral-200/80 dark:border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-neutral-800 mb-2">
-              My Dashboard
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                Verified Guest Hub
+              </span>
+            </div>
+            <h1 className="text-3xl font-extrabold text-neutral-900 dark:text-white tracking-tight">
+              My Stay Inquiries
             </h1>
-            <p className="text-neutral-600">
-              Welcome back, <span className="font-semibold">{user.displayName || user.email}</span>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+              Welcome back, <strong className="text-neutral-800 dark:text-neutral-200">{user?.displayName || user?.email}</strong>
             </p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="px-6 py-3 border-2 border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors font-medium flex items-center gap-2 w-fit"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Logout
-          </button>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg p-6 border border-neutral-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-neutral-600 text-sm mb-1">Total Enquiries</p>
-                <p className="text-3xl font-bold text-neutral-800">{enquiries.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 border border-neutral-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-neutral-600 text-sm mb-1">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {enquiries.filter(e => e.status === 'pending').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 border border-neutral-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-neutral-600 text-sm mb-1">Confirmed</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {enquiries.filter(e => e.status === 'confirmed').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Enquiries List */}
-        {enquiries.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center border border-neutral-200">
-            <svg className="w-24 h-24 mx-auto text-neutral-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h3 className="text-xl font-semibold text-neutral-700 mb-2">No Enquiries Yet</h3>
-            <p className="text-neutral-600 mb-6">Start exploring our villas and make your first enquiry!</p>
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => window.location.hash = '#properties'}
-              className="px-6 py-3 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-medium"
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-200/80 dark:bg-white/10 hover:bg-rose-500/10 hover:text-rose-500 text-neutral-700 dark:text-neutral-300 transition-colors"
             >
-              Browse Villas
+              Log Out
             </button>
           </div>
+        </div>
+
+        {/* Metric Badges */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="glass-card rounded-2xl p-5 border border-neutral-200/80 dark:border-white/10">
+            <span className="text-xs font-semibold text-neutral-500 uppercase">Total Inquiries</span>
+            <p className="text-3xl font-black text-neutral-900 dark:text-white mt-1">{enquiries.length}</p>
+          </div>
+          <div className="glass-card rounded-2xl p-5 border border-amber-500/20 bg-amber-500/5">
+            <span className="text-xs font-semibold text-amber-500 uppercase">Under Review</span>
+            <p className="text-3xl font-black text-amber-500 mt-1">
+              {enquiries.filter(e => e.status === 'pending').length}
+            </p>
+          </div>
+          <div className="glass-card rounded-2xl p-5 border border-emerald-500/20 bg-emerald-500/5">
+            <span className="text-xs font-semibold text-emerald-500 uppercase">Confirmed Dates</span>
+            <p className="text-3xl font-black text-emerald-500 mt-1">
+              {enquiries.filter(e => e.status === 'confirmed').length}
+            </p>
+          </div>
+        </div>
+
+        {/* List of Inquiries */}
+        {enquiries.length === 0 ? (
+          <div className="glass-card rounded-3xl p-12 text-center border border-neutral-200 dark:border-white/10 shadow-lg">
+            <span className="text-4xl block mb-3">📬</span>
+            <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+              No Inquiries Submitted Yet
+            </h3>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-6">
+              Explore our luxury villas in Lonavala & Mahabaleshwar and submit your holiday dates!
+            </p>
+            <a
+              href="#properties"
+              className="inline-block px-6 py-2.5 rounded-xl font-bold text-xs bg-emerald-500 text-neutral-950 shadow-md"
+            >
+              Explore Villas
+            </a>
+          </div>
         ) : (
-          <div>
-            <h2 className="text-2xl font-bold text-neutral-800 mb-6">
-              Your Enquiries
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {enquiries.map((enquiry) => (
-                <EnquiryCard 
-                  key={enquiry.id} 
-                  enquiry={enquiry} 
-                  onCancel={handleCancelEnquiry}
-                  showCancelButton={true}
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {enquiries.map((enquiry) => (
+              <EnquiryCard 
+                key={enquiry.id} 
+                enquiry={enquiry} 
+                onCancel={handleCancelEnquiry}
+                showCancelButton={true}
+              />
+            ))}
           </div>
         )}
       </div>

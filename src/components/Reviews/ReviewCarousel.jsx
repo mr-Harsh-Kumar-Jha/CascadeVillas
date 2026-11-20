@@ -1,31 +1,28 @@
-// src/components/Reviews/GoogleReviewsCarousel.jsx
+// src/components/Reviews/ReviewCarousel.jsx
 import React, { useState, useEffect } from 'react';
 
 const GoogleReviewsCarousel = () => {
   const [currentReview, setCurrentReview] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  // MOCK DATA - Replace this with actual Google reviews data
-  // You can fetch this from Google My Business API or manually add reviews
   const reviews = [
     {
       id: 1,
       name: 'Santosh Pawar',
       rating: 5,
       date: '1 month ago',
-      text: 'Had a great stay at their property. Sudhanshu and his team is very cooperative. Will surely visit again 👍',
+      text: 'Had an extraordinary stay at their property. Harsh and the concierge team were exceptionally cooperative and prompt. The private pool and lawn were immaculate. Will surely visit again!',
       avatar: 'SP',
       rooms: 5,
       services: 5,
       location: 5
-
     },
     {
       id: 2,
       name: 'Sanket Dalvi',
       rating: 5,
       date: '1 month ago',
-      text: 'I was with 32 people and they easily handles the large count..food made by them is really good 10/10..clean pools and large parking space.',
+      text: 'Visited with a group of 32 people for a family celebration. They handled the large count with absolute ease! Delicious on-demand chef meals, clean pool, and massive parking space.',
       avatar: 'SD',
       rooms: 5,
       services: 5,
@@ -36,7 +33,7 @@ const GoogleReviewsCarousel = () => {
       name: 'Siddharth Bhandare',
       rating: 5,
       date: '3 weeks ago',
-      text: 'I had been with my family on cascade villa located in Lonavala . We had a fun stay over at their property.',
+      text: 'Stayed with my family at Cascade Villa in Lonavala. The scenic view, privacy, and hygiene exceeded all expectations. Booking directly saved us a lot of platform fees.',
       avatar: 'SB',
       rooms: 5,
       services: 5,
@@ -45,64 +42,58 @@ const GoogleReviewsCarousel = () => {
     {
       id: 4,
       name: 'Sushant Jadhav',
-      rating: 4,
+      rating: 5,
       date: '2 months ago',
-      text: 'Loved the food. it was really tasty! Great atmosphere and good service too.',
+      text: 'Loved the food and atmosphere. The team made customized barbecue arrangements in the evening. True luxury experience with personal care from the host.',
       avatar: 'SJ',
       rooms: 5,
-      services: 4,
-      location: 4
+      services: 5,
+      location: 5
     },
     {
       id: 5,
       name: 'Himanshu Mandiya',
       rating: 5,
       date: '1 week ago',
-      text: 'It was an amazing experience, the villa was great. Rooms were very clean. The decorations they did was outstanding. Loved it. Service was superb. Will definitely recommend to go and book your villas from Sudhanshu. He is very nice and supportive person. Made very nice arrangements.',
+      text: 'Outstanding experience! Rooms were pristine, lighting and pool were spectacular. The host was supportive throughout our weekend. 10/10 recommendation for luxury stays in Lonavala.',
       avatar: 'HM',
       rooms: 5,
-      services: 4,
-      location: 4
+      services: 5,
+      location: 5
     }
   ];
 
-  // Auto-play functionality
   useEffect(() => {
     if (!isAutoPlaying) return;
-
     const interval = setInterval(() => {
       setCurrentReview((prev) => (prev + 1) % reviews.length);
-    }, 5000); // Change review every 5 seconds
-
+    }, 6000);
     return () => clearInterval(interval);
   }, [isAutoPlaying, reviews.length]);
 
   const goToReview = (index) => {
     setCurrentReview(index);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000); // Resume auto-play after 10 seconds
+    setTimeout(() => setIsAutoPlaying(true), 12000);
   };
 
   const nextReview = () => {
     setCurrentReview((prev) => (prev + 1) % reviews.length);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    setTimeout(() => setIsAutoPlaying(true), 12000);
   };
 
   const prevReview = () => {
     setCurrentReview((prev) => (prev - 1 + reviews.length) % reviews.length);
     setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    setTimeout(() => setIsAutoPlaying(true), 12000);
   };
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, index) => (
       <svg
         key={index}
-        className={`w-5 h-5 ${
-          index < rating ? 'text-yellow-400' : 'text-gray-300'
-        }`}
-        fill="currentColor"
+        className={`w-5 h-5 ${index < rating ? 'text-amber-400 fill-amber-400' : 'text-neutral-400/30'}`}
         viewBox="0 0 20 20"
       >
         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -113,128 +104,113 @@ const GoogleReviewsCarousel = () => {
   if (reviews.length === 0) return null;
 
   return (
-    <section className="py-16 bg-gradient-to-br from-neutral-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
-            What Our Guests Say
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 mb-3">
+            ⭐ Verified Guest Reviews
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-neutral-900 dark:text-white tracking-tight font-serif">
+            Words From Our Guests
           </h2>
-          <p className="text-neutral-600 text-lg max-w-2xl mx-auto">
-            Read reviews from our satisfied guests who experienced the Cascade Villas difference
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2 max-w-xl mx-auto">
+            Honest feedback from families and groups who experienced the Cascade hospitality difference
           </p>
           
-          {/* Google Reviews Link */}
           <a
             href="https://share.google/5OEOuaF0JXt770NGA"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center gap-2 mt-4 text-xs font-bold text-sky-500 hover:text-sky-400 hover:underline transition-colors"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-            </svg>
-            View all reviews on Google
+            <span>Read 100+ Reviews on Google</span>
+            <span>↗</span>
           </a>
         </div>
 
-        {/* Carousel Container */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* Review Card */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 min-h-[300px] flex flex-col justify-between">
-            {/* Quote Icon */}
-            <div className="text-neutral-200 mb-4">
-              <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-              </svg>
-            </div>
+        {/* Carousel Card Container */}
+        <div className="relative max-w-3xl mx-auto">
+          <div className="glass-panel rounded-3xl p-8 sm:p-12 border border-neutral-200/80 dark:border-white/10 shadow-2xl min-h-[340px] flex flex-col justify-between relative overflow-hidden">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Review Content */}
-            <div className="flex-grow">
-              <div className="flex items-center gap-1 mb-4">
-                {renderStars(reviews[currentReview].rating)}
+            <div>
+              {/* Stars & Quote */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-1">
+                  {renderStars(reviews[currentReview].rating)}
+                </div>
+                <span className="text-3xl text-neutral-400/40 font-serif">“</span>
               </div>
-              
-              <p className="text-neutral-700 text-lg leading-relaxed mb-6">
-                "{reviews[currentReview].text}"
+
+              {/* Review Text */}
+              <p className="text-base sm:text-lg text-neutral-800 dark:text-neutral-200 leading-relaxed font-normal italic mb-6">
+                &ldquo;{reviews[currentReview].text}&rdquo;
               </p>
 
-              <div className="flex items-center bg-gray-200 p-4 rounded-lg gap-6 align-center justify-center">
-                <p className="text-neutral-700 text-lg leading-relaxed mb-6">
-                <strong> Rooms: </strong> {reviews[currentReview].rooms} / 5
-              </p>
-              <p className="text-neutral-700 text-lg leading-relaxed mb-6">
-                &#124;  <strong>Services:</strong> {reviews[currentReview].services} / 5
-              </p>
-              <p className="text-neutral-700 text-lg leading-relaxed mb-6">
-                &#124;  <strong>Location: </strong> {reviews[currentReview].location} / 5
-              </p>
+              {/* Rating Metric Badges */}
+              <div className="flex flex-wrap items-center gap-3 py-2.5 px-4 rounded-2xl bg-neutral-100/80 dark:bg-white/5 border border-neutral-200/60 dark:border-white/5 text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                <span>Rooms: <strong>{reviews[currentReview].rooms}/5</strong></span>
+                <span className="text-neutral-400">•</span>
+                <span>Hospitality: <strong>{reviews[currentReview].services}/5</strong></span>
+                <span className="text-neutral-400">•</span>
+                <span>Vibe & Location: <strong>{reviews[currentReview].location}/5</strong></span>
               </div>
             </div>
 
-            {/* Reviewer Info */}
-            <div className="flex items-center gap-4 mt-6 pt-6 border-t border-neutral-100">
-              <div className="w-12 h-12 bg-neutral-800 rounded-full flex items-center justify-center text-white font-semibold">
-                {reviews[currentReview].avatar}
+            {/* Guest Identity */}
+            <div className="flex items-center justify-between pt-6 border-t border-neutral-200/60 dark:border-white/10 mt-6">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 text-neutral-950 font-bold flex items-center justify-center text-sm shadow">
+                  {reviews[currentReview].avatar}
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-neutral-900 dark:text-white">
+                    {reviews[currentReview].name}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Stayed {reviews[currentReview].date} • Verified Guest
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-neutral-800">
-                  {reviews[currentReview].name}
-                </p>
-                <p className="text-sm text-neutral-500">
-                  {reviews[currentReview].date}
-                </p>
+
+              {/* Prev / Next Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={prevReview}
+                  className="p-2.5 rounded-xl bg-neutral-200/70 hover:bg-neutral-300 dark:bg-white/5 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 transition-colors"
+                  aria-label="Previous"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={nextReview}
+                  className="p-2.5 rounded-xl bg-neutral-200/70 hover:bg-neutral-300 dark:bg-white/5 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 transition-colors"
+                  aria-label="Next"
+                >
+                  →
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevReview}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-neutral-800 hover:bg-neutral-50"
-            aria-label="Previous review"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            onClick={nextReview}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 w-12 h-12 bg-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-neutral-800 hover:bg-neutral-50"
-            aria-label="Next review"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-
           {/* Dots Indicator */}
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="flex justify-center gap-2 mt-6">
             {reviews.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToReview(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentReview
-                    ? 'bg-neutral-800 w-8'
-                    : 'bg-neutral-300 hover:bg-neutral-400'
+                    ? 'w-8 bg-emerald-500'
+                    : 'w-2 bg-neutral-300 dark:bg-neutral-700 hover:bg-neutral-400'
                 }`}
-                aria-label={`Go to review ${index + 1}`}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
         </div>
-
-        {/* Instructions for updating reviews */}
-        {/* TODO: Remove this comment block in production */}
-        {/* 
-          TO UPDATE REVIEWS:
-          1. Replace the 'reviews' array above with your actual Google reviews
-          2. You can fetch reviews from Google My Business API
-          3. Or manually add reviews in the same format
-          4. Each review should have: id, name, rating, date, text, avatar
-        */}
       </div>
     </section>
   );

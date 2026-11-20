@@ -1,4 +1,4 @@
-// src/App.jsx - Enhanced with Browser History Management
+// src/App.jsx
 import { useState, useEffect } from 'react';
 import './App.css';
 
@@ -15,11 +15,19 @@ import UserDashboard from './components/Dashboard/UserDashboard';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import EnquiryModal from './components/Enquiry/EnquiryModal';
 import SocialMediaButtons from './components/Common/SocialMediaButtons';
+import Footer from './components/Footer/Footer';
+import TermsOfService from './components/Legal/TermsOfService';
+import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import Loading from './components/Common/Loading';
 
+// Registered Admin Email Addresses
+const ADMIN_EMAILS = [
+  'contact@cascadevillas.in', 
+  'jhaharsh878@gmail.com', 
+  'cascadevillas.lonavala@gmail.com'
+];
+
 function App() {
-  // ADMIN EMAIL ADDRESSES
-  const ADMIN_EMAILS = ['contact@cascadevillas.in', 'jhaharsh878@gmail.com', "cascadevillas.lonavala@gmail.com"];
   
   const [currentPage, setCurrentPage] = useState('home');
   const [previousPage, setPreviousPage] = useState('home');
@@ -31,10 +39,10 @@ function App() {
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [historyInitialized, setHistoryInitialized] = useState(false);
+  const [propertiesFilters, setPropertiesFilters] = useState(null);
 
-  // ===== NEW: Browser History Management =====
+  // Browser History Management
   useEffect(() => {
-    // Initialize history state
     if (!historyInitialized) {
       const initialState = {
         page: 'home',
@@ -44,7 +52,6 @@ function App() {
       setHistoryInitialized(true);
     }
 
-    // Handle browser back/forward buttons
     const handlePopState = (event) => {
       if (event.state) {
         setCurrentPage(event.state.page);
@@ -55,13 +62,11 @@ function App() {
     };
 
     window.addEventListener('popstate', handlePopState);
-    
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
   }, [historyInitialized]);
 
-  // Update history when page changes
   const updateHistory = (page, villa = null) => {
     const state = { page, villa };
     const url = villa ? `/${page}/${villa.id}` : `/${page}`;
@@ -73,8 +78,8 @@ function App() {
     const unsubscribe = onAuthStateChange((currentUser) => {
       setUser(currentUser);
       
-      // Check if user is admin
-      if (currentUser && ADMIN_EMAILS.includes(currentUser.email)) {
+      // Check if logged-in user is admin
+      if (currentUser && currentUser.email && ADMIN_EMAILS.includes(currentUser.email.toLowerCase())) {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
@@ -86,12 +91,15 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  const handleNavigate = (page) => {
-    // If trying to access dashboard or admin without login
+  const handleNavigate = (page, filterParams = null) => {
     if ((page === 'dashboard' || page === 'admin') && !user) {
       setPreviousPage(currentPage);
       setShowAuthPage(true);
       return;
+    }
+
+    if (filterParams) {
+      setPropertiesFilters(filterParams);
     }
 
     setPreviousPage(currentPage);
@@ -99,9 +107,7 @@ function App() {
     setSelectedVilla(null);
     setShowAuthPage(false);
     
-    // Update browser history
     updateHistory(page);
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -110,19 +116,14 @@ function App() {
     setSelectedVilla(villa);
     setCurrentPage('villa-detail');
     
-    // Update browser history with villa details
     updateHistory('villa-detail', villa);
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToList = () => {
     setSelectedVilla(null);
     setCurrentPage('properties');
-    
-    // Update browser history
     updateHistory('properties');
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -144,7 +145,6 @@ function App() {
 
   const handleAuthSuccess = () => {
     setShowAuthPage(false);
-    // If they were trying to access dashboard/admin, go there
     if (currentPage === 'home' && previousPage === 'dashboard') {
       setCurrentPage('dashboard');
       updateHistory('dashboard');
@@ -166,23 +166,17 @@ function App() {
     setShowEnquiryModal(false);
     setEnquiryVilla(null);
     
-    // If user is logged in, navigate to dashboard
     if (user) {
       setCurrentPage('dashboard');
       updateHistory('dashboard');
       
-      // Show success message
       const successDiv = document.createElement('div');
-      successDiv.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-down';
+      successDiv.className = 'fixed top-20 left-1/2 -translate-x-1/2 glass-panel bg-emerald-500/90 text-neutral-950 font-bold px-6 py-4 rounded-2xl shadow-2xl z-50 animate-slide-down border border-emerald-400/50 backdrop-blur-xl flex items-center gap-3';
       successDiv.innerHTML = `
-        <div class="flex items-center gap-3">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <div>
-            <p class="font-semibold">Enquiry Submitted!</p>
-            <p class="text-sm">Check your dashboard to track status.</p>
-          </div>
+        <span class="text-xl">✓</span>
+        <div>
+          <p class="font-extrabold text-sm">Enquiry Submitted Successfully!</p>
+          <p class="text-xs font-medium text-emerald-950">Track live status and dates right from your guest dashboard.</p>
         </div>
       `;
       document.body.appendChild(successDiv);
@@ -193,14 +187,12 @@ function App() {
     }
   };
 
-  // Show auth page
   if (showAuthPage) {
     return <AuthPage onSuccess={handleAuthSuccess} onBack={handleAuthBack} />;
   }
 
-  // Show loading while checking auth
   if (authLoading) {
-    return <Loading fullScreen text="Loading..." />;
+    return <Loading fullScreen text="Loading Cascade Villas..." />;
   }
 
   const renderPage = () => {
@@ -218,7 +210,13 @@ function App() {
       case 'home':
         return <Landing onVillaClick={handleVillaClick} onNavigate={handleNavigate} />;
       case 'properties':
-        return <VillaList onVillaClick={handleVillaClick} />;
+        return (
+          <VillaList 
+            onVillaClick={handleVillaClick} 
+            initialFilters={propertiesFilters}
+            onClearInitialFilters={() => setPropertiesFilters(null)}
+          />
+        );
       case 'dashboard':
         return user ? (
           <UserDashboard onLogout={handleLogout} />
@@ -231,14 +229,18 @@ function App() {
         ) : (
           <Landing onVillaClick={handleVillaClick} onNavigate={handleNavigate} />
         );
+      case 'terms':
+        return <TermsOfService onNavigate={handleNavigate} />;
+      case 'privacy':
+        return <PrivacyPolicy onNavigate={handleNavigate} />;
       default:
         return <Landing onVillaClick={handleVillaClick} onNavigate={handleNavigate} />;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Navigation */}
+    <div className="flex min-h-screen bg-[#f8fafc] dark:bg-[#07070a] text-slate-900 dark:text-neutral-100 transition-colors duration-300">
+      {/* Navigation (Sidebar Desktop / Floating Mobile) */}
       <Navigation 
         currentPage={currentPage} 
         onNavigate={handleNavigate} 
@@ -246,9 +248,12 @@ function App() {
         isAdmin={isAdmin}
       />
 
-      {/* Main Content */}
-      <main className="flex-1">
-        {renderPage()}
+      {/* Main Content View with Persistent Footer */}
+      <main className="flex-1 min-w-0 flex flex-col justify-between">
+        <div className="flex-1">
+          {renderPage()}
+        </div>
+        <Footer onNavigate={handleNavigate} />
       </main>
 
       {/* Enquiry Modal */}
@@ -264,7 +269,7 @@ function App() {
         />
       )}
 
-      {/* Social Media Buttons */}
+      {/* Floating Concierge Action Dock */}
       <SocialMediaButtons />
     </div>
   );

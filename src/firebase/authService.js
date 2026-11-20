@@ -1,5 +1,5 @@
 // src/firebase/authService.js
-import { 
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -14,12 +14,12 @@ import { auth } from './config';
 export const signUpWithEmail = async (email, password, displayName) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    
+
     // Update profile with display name
     await updateProfile(userCredential.user, {
       displayName: displayName
     });
-    
+
     return userCredential.user;
   } catch (error) {
     console.error('Error signing up:', error);

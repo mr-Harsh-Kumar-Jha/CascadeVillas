@@ -9,10 +9,10 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   limit
 } from 'firebase/firestore';
 import { db } from './config';
+import { deleteMultipleImages } from './storageService';
 
 const VILLAS_COLLECTION = 'villas';
 
@@ -21,12 +21,30 @@ export const getAllVillas = async () => {
   try {
     const villasRef = collection(db, VILLAS_COLLECTION);
     const snapshot = await getDocs(villasRef);
-    return snapshot.docs.map(doc => ({
+    const remoteVillas = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    // Merge any locally saved villas (from local fallback inventory)
+    try {
+      const localVillas = JSON.parse(localStorage.getItem('cascade_local_villas') || '[]');
+      if (Array.isArray(localVillas) && localVillas.length > 0) {
+        const remoteIds = new Set(remoteVillas.map(v => v.id));
+        const uniqueLocal = localVillas.filter(v => !remoteIds.has(v.id));
+        return [...uniqueLocal, ...remoteVillas];
+      }
+    } catch { /* ignore local storage errors */ }
+
+    return remoteVillas;
   } catch (error) {
     console.error('Error fetching villas:', error);
+    try {
+      const localVillas = JSON.parse(localStorage.getItem('cascade_local_villas') || '[]');
+      if (Array.isArray(localVillas) && localVillas.length > 0) {
+        return localVillas;
+      }
+    } catch { /* ignore */ }
     throw error;
   }
 };
@@ -34,6 +52,15 @@ export const getAllVillas = async () => {
 // Get villa by ID
 export const getVillaById = async (villaId) => {
   try {
+    // Check local fallback first if it is a local ID
+    if (typeof villaId === 'string' && villaId.startsWith('local_')) {
+      try {
+        const localVillas = JSON.parse(localStorage.getItem('cascade_local_villas') || '[]');
+        const match = localVillas.find(v => v.id === villaId);
+        if (match) return match;
+      } catch { /* ignore */ }
+    }
+
     const villaRef = doc(db, VILLAS_COLLECTION, villaId);
     const snapshot = await getDoc(villaRef);
     
@@ -43,6 +70,12 @@ export const getVillaById = async (villaId) => {
         ...snapshot.data()
       };
     } else {
+      // Check local storage before throwing
+      try {
+        const localVillas = JSON.parse(localStorage.getItem('cascade_local_villas') || '[]');
+        const match = localVillas.find(v => v.id === villaId);
+        if (match) return match;
+      } catch { /* ignore */ }
       throw new Error('Villa not found');
     }
   } catch (error) {
@@ -94,35 +127,35 @@ export const getTrendingVillas = async () => {
 // Filter villas
 export const filterVillas = async (filters) => {
   try {
-    let villasRef = collection(db, VILLAS_COLLECTION);
-    let q = villasRef;
+    const allVillas = await getAllVillas();
 
-    // Apply filters
-    if (filters.location && filters.location !== 'all') {
-      q = query(q, where('location', '==', filters.location));
-    }
+    return allVillas.filter(villa => {
+      // 1. Destination / Location filter
+      if (filters.location && filters.location !== 'all') {
+        const villaLoc = (villa.location || '').trim().toLowerCase();
+        const reqLoc = filters.location.trim().toLowerCase();
+        if (villaLoc !== reqLoc) return false;
+      }
 
-    if (filters.bedrooms && filters.bedrooms !== 'all') {
-      q = query(q, where('bedrooms', '==', parseInt(filters.bedrooms)));
-    }
+      // 2. Bedrooms filter
+      if (filters.bedrooms && filters.bedrooms !== 'all') {
+        const reqBeds = parseInt(filters.bedrooms, 10);
+        const villaBeds = parseInt(villa.bedrooms, 10) || 0;
+        if (reqBeds === 5) {
+          // 5+ Bedrooms matches 5, 6, 7+ BHK estates
+          if (villaBeds < 5) return false;
+        } else {
+          if (villaBeds !== reqBeds) return false;
+        }
+      }
 
-    const snapshot = await getDocs(q);
-    let villas = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+      // 3. Price filter
+      const price = Number(villa.pricePerNight) || 0;
+      if (filters.minPrice !== undefined && price < filters.minPrice) return false;
+      if (filters.maxPrice !== undefined && price > filters.maxPrice) return false;
 
-    // Client-side price filtering (Firestore doesn't support range queries well with other filters)
-    if (filters.minPrice || filters.maxPrice) {
-      villas = villas.filter(villa => {
-        const price = villa.pricePerNight;
-        if (filters.minPrice && price < filters.minPrice) return false;
-        if (filters.maxPrice && price > filters.maxPrice) return false;
-        return true;
-      });
-    }
-
-    return villas;
+      return true;
+    });
   } catch (error) {
     console.error('Error filtering villas:', error);
     throw error;
@@ -159,11 +192,24 @@ export const updateVilla = async (villaId, villaData) => {
   }
 };
 
-// Delete villa (for admin)
+// Delete villa (for admin) - Also deletes all associated photos from Firebase Storage
 export const deleteVilla = async (villaId) => {
   try {
+    // 1. Fetch villa data first to locate linked photos
+    try {
+      const villa = await getVillaById(villaId);
+      if (villa && Array.isArray(villa.images) && villa.images.length > 0) {
+        // Delete all linked photos stored on server/Firebase Storage
+        await deleteMultipleImages(villa.images);
+      }
+    } catch (fetchErr) {
+      console.warn('Could not retrieve villa details for image cleanup prior to delete:', fetchErr);
+    }
+
+    // 2. Delete Firestore villa document
     const villaRef = doc(db, VILLAS_COLLECTION, villaId);
     await deleteDoc(villaRef);
+    return true;
   } catch (error) {
     console.error('Error deleting villa:', error);
     throw error;

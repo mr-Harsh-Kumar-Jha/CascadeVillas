@@ -1,4 +1,26 @@
-// WhatsApp Business Number
+// src/utils/constants.js
+
+// Developer Hologram & Creator Information (Strictly for Footer Attribution)
+export const DEVELOPER_INFO = {
+  name: 'Harsh Jha',
+  role: 'Full Stack Web Developer & Software Engineer',
+  phone: '+91 9075840173',
+  phoneClean: '919075840173',
+  linkedin: 'https://www.linkedin.com/in/harshjha04/',
+  email: 'jhaharsh878@gmail.com',
+  tagline: 'Custom Full-Stack Web Development, Modern Glassmorphic UI/UX & Cloud Architecture'
+};
+
+// Cascade Villas Concierge Desk Contact Information
+export const CONCIERGE_INFO = {
+  phone: '+91 7066670757',
+  phoneClean: '917066670757',
+  email: 'contact@cascadevillas.in',
+  whatsapp: '+917066670757',
+  hours: '24/7 Guest Assistance'
+};
+
+// WhatsApp Business Number for Villa Inquiries
 export const WHATSAPP_NUMBER = '+917066670757';
 
 // Locations
@@ -35,10 +57,10 @@ export const ENQUIRY_STATUS = {
 
 // Status Colors
 export const STATUS_COLORS = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  contacted: 'bg-blue-100 text-blue-800',
-  confirmed: 'bg-green-100 text-green-800',
-  cancelled: 'bg-red-100 text-red-800'
+  pending: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30',
+  contacted: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30',
+  confirmed: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30',
+  cancelled: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30'
 };
 
 // Amenities Icons

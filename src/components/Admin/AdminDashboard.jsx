@@ -1,4 +1,4 @@
-// src/components/Admin/AdminDashboard.jsx - FIXED WITH TABS
+// src/components/Admin/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase/config';
@@ -6,17 +6,14 @@ import { getCurrentUser, logOut } from '../../firebase/authService';
 import { formatDateTime, formatDate } from '../../utils/helpers';
 import { STATUS_COLORS } from '../../utils/constants';
 import Loading from '../Common/Loading';
-import AdminVillaManagement from './AdminVillaManagement'; // âœ… ADDED: Import VillaManagement
+import AdminVillaManagement from './AdminVillaManagement';
 
 const AdminDashboard = ({ onLogout }) => {
-  // âœ… ADDED: Tab state
-  const [activeTab, setActiveTab] = useState('enquiries'); // 'enquiries' or 'villas'
-  
+  const [activeTab, setActiveTab] = useState('villas'); // Default to villas as requested for photo listing
   const [enquiries, setEnquiries] = useState([]);
   const [filteredEnquiries, setFilteredEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
@@ -30,6 +27,8 @@ const AdminDashboard = ({ onLogout }) => {
     setUser(currentUser);
     if (activeTab === 'enquiries') {
       loadAllEnquiries();
+    } else {
+      setLoading(false);
     }
   }, [activeTab]);
 
@@ -40,7 +39,6 @@ const AdminDashboard = ({ onLogout }) => {
   const loadAllEnquiries = async () => {
     try {
       setLoading(true);
-      setError(null);
       
       const enquiriesRef = collection(db, 'enquiries');
       const q = query(enquiriesRef);
@@ -55,14 +53,11 @@ const AdminDashboard = ({ onLogout }) => {
         };
       });
       
-      // Sort by date descending
       data.sort((a, b) => b.createdAt - a.createdAt);
-      
       setEnquiries(data);
       setFilteredEnquiries(data);
-    } catch (error) {
-      console.error('Error fetching enquiries:', error);
-      setError('Failed to load enquiries: ' + error.message);
+    } catch (err) {
+      console.error('Error fetching enquiries:', err);
     } finally {
       setLoading(false);
     }
@@ -106,15 +101,10 @@ const AdminDashboard = ({ onLogout }) => {
       ));
       
       setSelectedEnquiry(null);
-      
-      // Show success message
-      alert(`Enquiry ${newStatus} successfully!`);
-      
-      // Reload enquiries to ensure consistency
       await loadAllEnquiries();
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Failed to update status: ' + error.message);
+    } catch (err) {
+      console.error('Error updating status:', err);
+      alert('Failed to update status: ' + err.message);
     } finally {
       setUpdating(false);
     }
@@ -124,8 +114,8 @@ const AdminDashboard = ({ onLogout }) => {
     try {
       await logOut();
       if (onLogout) onLogout();
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (err) {
+      console.error('Logout error:', err);
     }
   };
 
@@ -147,113 +137,120 @@ const AdminDashboard = ({ onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      {/* Header */}
-      <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-800">Admin Dashboard</h1>
-              {user && (
-                <p className="text-sm text-neutral-600">{user.email}</p>
-              )}
+    <div className="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Glass Header Bar */}
+        <div className="glass-panel rounded-3xl p-6 border border-neutral-200/80 dark:border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/15 text-rose-500 border border-rose-500/30">
+                Admin Console
+              </span>
+              <span className="text-xs text-neutral-500">
+                Cascade Villas Management
+              </span>
             </div>
+            <h1 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
+              Cascade Villas Executive Hub
+            </h1>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Logged in as <span className="font-semibold text-neutral-800 dark:text-neutral-200">{user?.email}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-neutral-700 hover:text-neutral-900 font-medium"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-neutral-200/80 dark:bg-white/10 hover:bg-rose-500/10 hover:text-rose-500 dark:hover:bg-rose-500/20 text-neutral-700 dark:text-neutral-300 transition-colors"
             >
-              Logout
+              Log Out
             </button>
           </div>
         </div>
-      </div>
 
-      {/* âœ… ADDED: Tab Navigation */}
-      <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('enquiries')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'enquiries'
-                  ? 'border-neutral-800 text-neutral-800'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
-              }`}
-            >
-              Enquiries
-              {stats.total > 0 && (
-                <span className="ml-2 px-2 py-0.5 bg-neutral-200 text-neutral-700 rounded-full text-xs">
-                  {stats.total}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('villas')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'villas'
-                  ? 'border-neutral-800 text-neutral-800'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
-              }`}
-            >
-              Villa Management
-            </button>
-          </div>
+        {/* Tab Switcher */}
+        <div className="flex space-x-2 p-1.5 rounded-2xl glass-panel border border-neutral-200 dark:border-white/10 w-fit">
+          <button
+            onClick={() => setActiveTab('villas')}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 ${
+              activeTab === 'villas'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-md scale-[1.02]'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            }`}
+          >
+            <span>🏡 Villa Listings & Server Uploads</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('enquiries')}
+            className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 ${
+              activeTab === 'enquiries'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-md scale-[1.02]'
+                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+            }`}
+          >
+            <span>📬 Guest Enquiries</span>
+            {stats.pending > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-neutral-950">
+                {stats.pending}
+              </span>
+            )}
+          </button>
         </div>
-      </div>
 
-      {/* âœ… ADDED: Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'enquiries' ? (
-          /* ENQUIRIES TAB CONTENT */
-          <>
+        {/* Tab Content */}
+        {activeTab === 'villas' ? (
+          <AdminVillaManagement />
+        ) : (
+          <div className="space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-              <div className="bg-white rounded-lg p-6 border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-1">Total</p>
-                <p className="text-3xl font-bold text-neutral-800">{stats.total}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              <div className="glass-card rounded-2xl p-4 border border-neutral-200/70 dark:border-white/10">
+                <span className="text-[11px] font-semibold text-neutral-500 uppercase">Total Enquiries</span>
+                <p className="text-2xl font-black text-neutral-900 dark:text-white mt-1">{stats.total}</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-1">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+              <div className="glass-card rounded-2xl p-4 border border-amber-500/20 bg-amber-500/5">
+                <span className="text-[11px] font-semibold text-amber-500 uppercase">Pending</span>
+                <p className="text-2xl font-black text-amber-500 mt-1">{stats.pending}</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-1">Contacted</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.contacted}</p>
+              <div className="glass-card rounded-2xl p-4 border border-sky-500/20 bg-sky-500/5">
+                <span className="text-[11px] font-semibold text-sky-500 uppercase">Contacted</span>
+                <p className="text-2xl font-black text-sky-500 mt-1">{stats.contacted}</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-1">Confirmed</p>
-                <p className="text-3xl font-bold text-green-600">{stats.confirmed}</p>
+              <div className="glass-card rounded-2xl p-4 border border-emerald-500/20 bg-emerald-500/5">
+                <span className="text-[11px] font-semibold text-emerald-500 uppercase">Confirmed</span>
+                <p className="text-2xl font-black text-emerald-500 mt-1">{stats.confirmed}</p>
               </div>
-              <div className="bg-white rounded-lg p-6 border border-neutral-200">
-                <p className="text-sm text-neutral-600 mb-1">Cancelled</p>
-                <p className="text-3xl font-bold text-red-600">{stats.cancelled}</p>
+              <div className="glass-card rounded-2xl p-4 border border-rose-500/20 bg-rose-500/5">
+                <span className="text-[11px] font-semibold text-rose-500 uppercase">Cancelled</span>
+                <p className="text-2xl font-black text-rose-500 mt-1">{stats.cancelled}</p>
               </div>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white rounded-lg p-6 mb-6 border border-neutral-200">
+            {/* Filter Bar */}
+            <div className="glass-card rounded-2xl p-5 border border-neutral-200 dark:border-white/10">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Search
+                  <label className="block text-xs font-bold uppercase text-neutral-600 dark:text-neutral-400 mb-1">
+                    Search Guest / Villa
                   </label>
                   <input
                     type="text"
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                    placeholder="Name, email, phone, villa..."
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                    placeholder="Search by name, email, phone..."
+                    className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Status
+                  <label className="block text-xs font-bold uppercase text-neutral-600 dark:text-neutral-400 mb-1">
+                    Filter Status
                   </label>
                   <select
                     value={filters.status}
                     onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                    className="w-full px-4 py-2.5 rounded-xl glass-input text-xs bg-neutral-100 dark:bg-neutral-900"
                   >
                     <option value="all">All Statuses</option>
                     <option value="pending">Pending</option>
@@ -264,13 +261,13 @@ const AdminDashboard = ({ onLogout }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Villa
+                  <label className="block text-xs font-bold uppercase text-neutral-600 dark:text-neutral-400 mb-1">
+                    Filter Property
                   </label>
                   <select
                     value={filters.villaName}
                     onChange={(e) => setFilters(prev => ({ ...prev, villaName: e.target.value }))}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                    className="w-full px-4 py-2.5 rounded-xl glass-input text-xs bg-neutral-100 dark:bg-neutral-900"
                   >
                     <option value="all">All Villas</option>
                     {getUniqueVillaNames().map(name => (
@@ -282,92 +279,68 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
 
             {/* Enquiries Table */}
-            <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+            <div className="glass-card rounded-3xl border border-neutral-200 dark:border-white/10 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-neutral-50 border-b border-neutral-200">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-neutral-100/70 dark:bg-white/5 border-b border-neutral-200 dark:border-white/10 uppercase font-black text-neutral-500">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Customer
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Villa
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Dates
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Source
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Created
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <th className="px-6 py-4">Guest Details</th>
+                      <th className="px-6 py-4">Villa</th>
+                      <th className="px-6 py-4">Dates</th>
+                      <th className="px-6 py-4">Source</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4">Created</th>
+                      <th className="px-6 py-4">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-200">
+                  <tbody className="divide-y divide-neutral-200/60 dark:divide-white/5 font-medium">
                     {filteredEnquiries.length === 0 ? (
                       <tr>
-                        <td colSpan="7" className="px-6 py-8 text-center text-neutral-500">
-                          {filters.search || filters.status !== 'all' || filters.villaName !== 'all'
-                            ? 'No enquiries match your filters'
-                            : 'No enquiries yet'}
+                        <td colSpan="7" className="px-6 py-12 text-center text-neutral-500">
+                          No enquiries found matching your filters.
                         </td>
                       </tr>
                     ) : (
                       filteredEnquiries.map((enquiry) => (
-                        <tr key={enquiry.id} className="hover:bg-neutral-50">
+                        <tr key={enquiry.id} className="hover:bg-neutral-100/50 dark:hover:bg-white/5 transition-colors">
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-neutral-800">
-                              {enquiry.userName}
-                            </div>
-                            <div className="text-sm text-neutral-600">
-                              {enquiry.email}
-                            </div>
-                            <div className="text-sm text-neutral-600">
-                              {enquiry.phone}
-                            </div>
+                            <div className="font-bold text-neutral-900 dark:text-white">{enquiry.userName}</div>
+                            <div className="text-neutral-500">{enquiry.email}</div>
+                            <div className="text-emerald-500 font-semibold">{enquiry.phone}</div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-neutral-800">
+                          <td className="px-6 py-4 font-bold text-neutral-800 dark:text-neutral-200">
                             {enquiry.villaName}
                           </td>
-                          <td className="px-6 py-4 text-sm text-neutral-600">
+                          <td className="px-6 py-4 text-neutral-600 dark:text-neutral-300">
                             {enquiry.checkInDate ? (
-                              <>
-                                <div>{formatDate(enquiry.checkInDate)}</div>
-                                <div>to</div>
-                                <div>{formatDate(enquiry.checkOutDate)}</div>
-                              </>
+                              <div>
+                                <span>{formatDate(enquiry.checkInDate)}</span>
+                                <span className="text-neutral-400 mx-1">→</span>
+                                <span>{formatDate(enquiry.checkOutDate)}</span>
+                              </div>
                             ) : (
-                              'Not specified'
+                              'Dates on request'
                             )}
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              enquiry.source === 'whatsapp' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-blue-100 text-blue-800'
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              enquiry.source === 'whatsapp' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-sky-500/15 text-sky-500'
                             }`}>
-                              {enquiry.source || 'website'}
+                              {enquiry.source || 'Website'}
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[enquiry.status] || STATUS_COLORS.pending} capitalize`}>
+                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${STATUS_COLORS[enquiry.status] || STATUS_COLORS.pending} capitalize`}>
                               {enquiry.status || 'pending'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-neutral-600">
+                          <td className="px-6 py-4 text-neutral-500">
                             {formatDateTime(enquiry.createdAt)}
                           </td>
                           <td className="px-6 py-4">
                             <button
                               onClick={() => setSelectedEnquiry(enquiry)}
-                              className="text-neutral-600 hover:text-neutral-800 font-medium text-sm"
+                              className="px-3 py-1.5 rounded-lg bg-neutral-200 dark:bg-white/10 hover:bg-neutral-900 hover:text-white dark:hover:bg-white dark:hover:text-neutral-950 font-bold transition-all"
                             >
                               Manage
                             </button>
@@ -380,72 +353,49 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
             </div>
 
-            {/* Enquiry Detail Modal */}
+            {/* Manage Enquiry Modal */}
             {selectedEnquiry && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                  <div className="sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold text-neutral-800">
-                      Enquiry Details
-                    </h3>
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+                <div className="glass-panel bg-neutral-950 text-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-white/15 p-6 shadow-2xl">
+                  <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                    <h3 className="text-xl font-bold">Manage Guest Enquiry</h3>
                     <button
                       onClick={() => setSelectedEnquiry(null)}
-                      className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                      className="p-1.5 text-neutral-400 hover:text-white rounded-lg bg-white/5"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      ✕
                     </button>
                   </div>
 
-                  <div className="p-6 space-y-6">
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-700 mb-2">Customer Information</h4>
-                      <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
-                        <p className="text-sm"><span className="font-medium">Name:</span> {selectedEnquiry.userName}</p>
-                        <p className="text-sm"><span className="font-medium">Email:</span> {selectedEnquiry.email}</p>
-                        <p className="text-sm"><span className="font-medium">Phone:</span> {selectedEnquiry.phone}</p>
-                      </div>
+                  <div className="space-y-4 text-xs">
+                    <div className="p-4 rounded-xl bg-white/5 space-y-1.5">
+                      <p><span className="text-neutral-400">Guest:</span> <strong className="text-white">{selectedEnquiry.userName}</strong></p>
+                      <p><span className="text-neutral-400">Email:</span> <a href={`mailto:${selectedEnquiry.email}`} className="text-sky-400 hover:underline">{selectedEnquiry.email}</a></p>
+                      <p><span className="text-neutral-400">Phone:</span> <a href={`tel:${selectedEnquiry.phone}`} className="text-emerald-400 hover:underline">{selectedEnquiry.phone}</a></p>
+                      <p><span className="text-neutral-400">Villa:</span> <strong className="text-white">{selectedEnquiry.villaName}</strong></p>
+                      {selectedEnquiry.checkInDate && (
+                        <p><span className="text-neutral-400">Requested Dates:</span> {formatDate(selectedEnquiry.checkInDate)} to {formatDate(selectedEnquiry.checkOutDate)}</p>
+                      )}
+                      {selectedEnquiry.message && (
+                        <p className="pt-2 text-neutral-300 italic border-t border-white/10">&quot;{selectedEnquiry.message}&quot;</p>
+                      )}
                     </div>
 
                     <div>
-                      <h4 className="text-sm font-semibold text-neutral-700 mb-2">Booking Details</h4>
-                      <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
-                        <p className="text-sm"><span className="font-medium">Villa:</span> {selectedEnquiry.villaName}</p>
-                        {selectedEnquiry.checkInDate && (
-                          <>
-                            <p className="text-sm"><span className="font-medium">Check-in:</span> {formatDate(selectedEnquiry.checkInDate)}</p>
-                            <p className="text-sm"><span className="font-medium">Check-out:</span> {formatDate(selectedEnquiry.checkOutDate)}</p>
-                          </>
-                        )}
-                        {selectedEnquiry.numberOfGuests && (
-                          <p className="text-sm"><span className="font-medium">Guests:</span> {selectedEnquiry.numberOfGuests}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-700 mb-2">Message</h4>
-                      <div className="bg-neutral-50 rounded-lg p-4">
-                        <p className="text-sm text-neutral-700">{selectedEnquiry.message}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-sm font-semibold text-neutral-700 mb-2">Update Status</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {['pending', 'contacted', 'confirmed', 'cancelled'].map((status) => (
+                      <span className="block text-xs font-bold uppercase text-neutral-300 mb-2">Change Status</span>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['pending', 'contacted', 'confirmed', 'cancelled'].map((st) => (
                           <button
-                            key={status}
-                            onClick={() => updateEnquiryStatus(selectedEnquiry.id, status)}
-                            disabled={updating || selectedEnquiry.status === status}
-                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                              selectedEnquiry.status === status
-                                ? 'bg-neutral-800 text-white cursor-not-allowed'
-                                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                            key={st}
+                            onClick={() => updateEnquiryStatus(selectedEnquiry.id, st)}
+                            disabled={updating || selectedEnquiry.status === st}
+                            className={`py-2 px-3 rounded-xl font-bold capitalize transition-all ${
+                              selectedEnquiry.status === st
+                                ? 'bg-emerald-500 text-neutral-950 shadow'
+                                : 'bg-white/10 hover:bg-white/20 text-neutral-300'
                             }`}
                           >
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                            {st}
                           </button>
                         ))}
                       </div>
@@ -454,10 +404,7 @@ const AdminDashboard = ({ onLogout }) => {
                 </div>
               </div>
             )}
-          </>
-        ) : (
-          /* âœ… VILLA MANAGEMENT TAB CONTENT */
-          <AdminVillaManagement />
+          </div>
         )}
       </div>
     </div>

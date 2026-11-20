@@ -23,11 +23,9 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
   const [dateConflict, setDateConflict] = useState(null);
   const [checkingDates, setCheckingDates] = useState(false);
 
-  // Check date conflicts whenever dates change
   useEffect(() => {
     const checkDates = async () => {
-      if (formData.checkInDate && formData.checkOutDate && villa.id) {
-        // Validate dates first
+      if (formData.checkInDate && formData.checkOutDate && villa?.id) {
         const checkIn = new Date(formData.checkInDate);
         const checkOut = new Date(formData.checkOutDate);
         
@@ -39,7 +37,6 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
           return;
         }
 
-        // Check for conflicts with existing bookings
         setCheckingDates(true);
         try {
           const hasConflict = await checkDateConflict(
@@ -51,12 +48,12 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
           if (hasConflict) {
             setDateConflict({
               hasConflict: true,
-              message: 'These dates are already booked. Please select different dates.'
+              message: 'These dates have a confirmed booking. Please choose alternate dates.'
             });
           } else {
             setDateConflict({
               hasConflict: false,
-              message: 'Dates are available!'
+              message: 'Selected dates are completely available!'
             });
           }
         } catch (error) {
@@ -70,40 +67,33 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
       }
     };
 
-    // Debounce the date check
     const timer = setTimeout(checkDates, 500);
     return () => clearTimeout(timer);
-  }, [formData.checkInDate, formData.checkOutDate, villa.id]);
+  }, [formData.checkInDate, formData.checkOutDate, villa?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
   const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const validatePhone = (phone) => {
-    const re = /^[0-9]{10,15}$/;
-    return re.test(phone.replace(/[\s-]/g, ''));
+    return /^[0-9]{10,15}$/.test(phone.replace(/[\s-]/g, ''));
   };
 
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
+    if (!formData.name.trim()) newErrors.name = 'Full name is required';
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'Email address is required';
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
@@ -111,24 +101,21 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number (10-15 digits)';
+      newErrors.phone = 'Valid phone number required (10-15 digits)';
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
+      newErrors.message = 'Please add a brief note about your stay requirement';
     }
 
-    // Check if dates are provided and valid
     if (formData.checkInDate && formData.checkOutDate) {
       const checkIn = new Date(formData.checkInDate);
       const checkOut = new Date(formData.checkOutDate);
-      
       if (checkOut <= checkIn) {
         newErrors.checkOutDate = 'Check-out must be after check-in';
       }
     }
 
-    // Check for date conflicts
     if (dateConflict && dateConflict.hasConflict) {
       newErrors.dates = dateConflict.message;
     }
@@ -139,12 +126,10 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
-    // Double-check date conflict before submitting
     if (dateConflict && dateConflict.hasConflict) {
-      alert('Cannot submit enquiry: Selected dates are already booked');
+      alert('Selected dates are already booked');
       return;
     }
 
@@ -181,66 +166,41 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
     }
   };
 
-  // Success modal for non-logged-in users
   if (showLoginSuggestion) {
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl max-w-md w-full p-8">
-          {/* Success Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div className="glass-panel bg-neutral-950 text-white rounded-3xl max-w-md w-full p-8 border border-white/15 text-center shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-3xl mb-4 border border-emerald-500/30">
+            ✓
           </div>
-
-          {/* Success Message */}
-          <h3 className="text-2xl font-bold text-neutral-800 text-center mb-3">
-            Enquiry Submitted Successfully!
+          <h3 className="text-2xl font-bold tracking-tight mb-2">
+            Enquiry Submitted!
           </h3>
-          <p className="text-neutral-600 text-center mb-6">
-            We've received your enquiry and will get back to you shortly at{' '}
-            <span className="font-semibold">{formData.email}</span>
+          <p className="text-xs text-neutral-400 mb-6 leading-relaxed">
+            Thank you! The Cascade concierge team will contact you shortly at <span className="text-emerald-400 font-semibold">{formData.email}</span>.
           </p>
 
-          {/* Email Confirmation Notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <p className="text-sm text-blue-800">
-                A confirmation email has been sent to your inbox with your enquiry details.
-              </p>
-            </div>
-          </div>
-
-          {/* Login Suggestion */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-neutral-700 mb-3">
-              💡 <strong>Want to track your enquiry?</strong>
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 mb-6 text-left">
+            <p className="text-xs font-bold text-white mb-1">
+              💡 Track Your Inquiry & Bookings
             </p>
-            <p className="text-sm text-neutral-600 mb-3">
-              Create an account to view all your enquiries, get real-time updates, and manage your bookings in one place!
+            <p className="text-[11px] text-neutral-400 mb-3">
+              Create a free passwordless or Google account to check live status and chat with the host.
             </p>
             <button
               onClick={() => {
                 onClose();
-                if (onLoginRequired) {
-                  setTimeout(() => onLoginRequired(), 100);
-                }
+                if (onLoginRequired) setTimeout(onLoginRequired, 100);
               }}
-              className="w-full px-4 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-semibold text-sm"
+              className="w-full py-2.5 px-4 rounded-xl font-bold text-xs bg-emerald-500 text-neutral-950 hover:bg-emerald-600 transition-colors"
             >
-              Create Account / Login
+              Sign In / Track Enquiry
             </button>
           </div>
 
-          {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 border-2 border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-semibold"
+            className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-neutral-800 text-neutral-300 hover:text-white"
           >
             Close
           </button>
@@ -250,211 +210,95 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="glass-panel bg-neutral-950 text-white rounded-3xl max-w-xl w-full max-h-[92vh] overflow-y-auto border border-white/15 shadow-2xl animate-scale-in">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-neutral-950/90 backdrop-blur-md border-b border-white/10 p-6 flex items-center justify-between z-10">
           <div>
-            <h2 className="text-2xl font-bold text-neutral-800">Enquire About Villa</h2>
-            <p className="text-neutral-600 mt-1">{villa.name}</p>
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-0.5">
+              Direct Host Reservation Inquiry
+            </span>
+            <h2 className="text-xl font-black tracking-tight">{villa.name}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="p-2 text-neutral-400 hover:text-white rounded-xl bg-white/5 transition-colors"
             disabled={loading}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* User Info Display (if logged in) */}
-        {user && (
-          <div className="px-6 pt-6">
-            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-              <div className="flex items-center gap-2 mb-2">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm font-semibold text-green-800">You're logged in</p>
-              </div>
-              <p className="text-sm text-green-700">Your enquiry will be tracked automatically in your dashboard</p>
+        {/* User state badge */}
+        <div className="px-6 pt-4">
+          {user ? (
+            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 flex items-center gap-2">
+              <span>✓</span>
+              <span>Logged in as <strong>{user.email}</strong>. This inquiry will be linked to your dashboard.</span>
             </div>
-          </div>
-        )}
-
-        {/* Not Logged In Notice */}
-        {!user && (
-          <div className="px-6 pt-6">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <p className="text-sm font-semibold text-blue-800 mb-1">Quick Enquiry</p>
-                  <p className="text-sm text-blue-700">
-                    You can submit an enquiry without logging in. To track your enquiry status, consider creating an account after submitting.
-                  </p>
-                </div>
-              </div>
+          ) : (
+            <div className="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-300 flex items-center gap-2">
+              <span>ℹ️</span>
+              <span>Submitting as guest. No payment required at this step.</span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Contact Information - Always visible, pre-filled if logged in */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-neutral-800">Contact Information</h3>
-            
-            {/* Name */}
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">
+                Your Name <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your full name"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800 ${
-                  errors.name ? 'border-red-500' : 'border-neutral-200'
-                } ${user ? 'bg-neutral-50' : ''}`}
+                placeholder="Full Name"
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
                 disabled={loading || user}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-500">{errors.name}</p>
-              )}
+              {errors.name && <p className="mt-1 text-[11px] text-rose-500 font-semibold">{errors.name}</p>}
             </div>
 
-            {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                Email Address <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">
+                Email Address <span className="text-rose-500">*</span>
               </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="your.email@example.com"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800 ${
-                  errors.email ? 'border-red-500' : 'border-neutral-200'
-                } ${user ? 'bg-neutral-50' : ''}`}
+                placeholder="name@example.com"
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
                 disabled={loading || user}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-              )}
+              {errors.email && <p className="mt-1 text-[11px] text-rose-500 font-semibold">{errors.email}</p>}
             </div>
+          </div>
 
-            {/* Phone */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                Phone Number <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">
+                Phone Number <span className="text-rose-500">*</span>
               </label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="+91 XXXXXXXXXX"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800 ${
-                  errors.phone ? 'border-red-500' : 'border-neutral-200'
-                }`}
+                placeholder="+91 98765 43210"
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
                 disabled={loading}
               />
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Booking Details */}
-          <div className="space-y-4 pt-4 border-t border-neutral-200">
-            <h3 className="text-lg font-semibold text-neutral-800">Booking Details</h3>
-            
-            {/* Dates */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                  Check-in Date
-                </label>
-                <input
-                  type="date"
-                  name="checkInDate"
-                  value={formData.checkInDate}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                  Check-out Date
-                </label>
-                <input
-                  type="date"
-                  name="checkOutDate"
-                  value={formData.checkOutDate}
-                  onChange={handleChange}
-                  min={formData.checkInDate || new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
-                  disabled={loading}
-                />
-              </div>
+              {errors.phone && <p className="mt-1 text-[11px] text-rose-500 font-semibold">{errors.phone}</p>}
             </div>
 
-            {/* Date Availability Feedback */}
-            {checkingDates && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                <p className="text-sm text-blue-800 font-medium">Checking availability...</p>
-              </div>
-            )}
-
-            {dateConflict && !checkingDates && (
-              <div className={`p-4 border rounded-lg flex items-start gap-3 ${
-                dateConflict.hasConflict 
-                  ? 'bg-red-50 border-red-200' 
-                  : 'bg-green-50 border-green-200'
-              }`}>
-                <svg 
-                  className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                    dateConflict.hasConflict ? 'text-red-600' : 'text-green-600'
-                  }`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  {dateConflict.hasConflict ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  )}
-                </svg>
-                <div>
-                  <p className={`text-sm font-semibold ${
-                    dateConflict.hasConflict ? 'text-red-800' : 'text-green-800'
-                  }`}>
-                    {dateConflict.message}
-                  </p>
-                  {dateConflict.hasConflict && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Please check the calendar above or choose different dates.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Number of Guests */}
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">
                 Number of Guests
               </label>
               <input
@@ -463,51 +307,80 @@ const EnquiryModal = ({ villa, onClose, onSuccess, onLoginRequired }) => {
                 value={formData.numberOfGuests}
                 onChange={handleChange}
                 min="1"
-                max={villa.maxGuests}
-                placeholder={`Max ${villa.maxGuests} guests`}
-                className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800"
+                max={villa.maxGuests || 50}
+                placeholder={`Up to ${villa.maxGuests || 15}`}
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
                 disabled={loading}
               />
-            </div>
-
-            {/* Message */}
-            <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                Message <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                rows="4"
-                placeholder="Tell us about your requirements, special requests, or any questions..."
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800 resize-none ${
-                  errors.message ? 'border-red-500' : 'border-neutral-200'
-                }`}
-                disabled={loading}
-              />
-              {errors.message && (
-                <p className="mt-1 text-sm text-red-500">{errors.message}</p>
-              )}
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 border-2 border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-semibold"
+          {/* Dates & Live Conflict Notice */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">Check-in Date</label>
+              <input
+                type="date"
+                name="checkInDate"
+                value={formData.checkInDate}
+                onChange={handleChange}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">Check-out Date</label>
+              <input
+                type="date"
+                name="checkOutDate"
+                value={formData.checkOutDate}
+                onChange={handleChange}
+                min={formData.checkInDate || new Date().toISOString().split('T')[0]}
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-xs"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {checkingDates && (
+            <p className="text-[11px] text-neutral-400 animate-pulse">Checking calendar availability...</p>
+          )}
+
+          {dateConflict && (
+            <div className={`p-3 rounded-xl text-xs font-semibold ${
+              dateConflict.hasConflict
+                ? 'bg-rose-500/15 border border-rose-500/30 text-rose-400'
+                : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
+            }`}>
+              {dateConflict.hasConflict ? '⚠️' : '✓'} {dateConflict.message}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold uppercase text-neutral-300 mb-1">
+              Your Requirements / Special Requests <span className="text-rose-500">*</span>
+            </label>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              rows="3"
+              placeholder="Tell us about the occasion (family stay, corporate retreat, birthday), catering needs, or check-in preferences..."
+              className="w-full px-4 py-2.5 rounded-xl glass-input text-xs resize-none"
               disabled={loading}
-            >
-              Cancel
-            </button>
+            />
+            {errors.message && <p className="mt-1 text-[11px] text-rose-500 font-semibold">{errors.message}</p>}
+          </div>
+
+          <div className="pt-2 flex items-center gap-3">
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700 transition-colors font-semibold disabled:bg-neutral-400 disabled:cursor-not-allowed"
-              disabled={loading || checkingDates || (dateConflict && dateConflict.hasConflict)}
+              disabled={loading || (dateConflict && dateConflict.hasConflict)}
+              className="flex-1 py-3 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-neutral-950 font-black text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : checkingDates ? 'Checking...' : 'Submit Enquiry'}
+              {loading ? 'Submitting...' : 'Send Inquiry to Concierge'}
             </button>
           </div>
         </form>

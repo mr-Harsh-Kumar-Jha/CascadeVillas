@@ -294,7 +294,19 @@ export const cancelEnquiry = async (enquiryId) => {
 export const getBlockedDates = async (villaId) => {
   try {
     const bookings = await getVillaBookings(villaId);
-    return bookings.map(booking => ({
+    
+    // Auto-clear past bookings: Only return active or future bookings
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activeBookings = bookings.filter(booking => {
+      if (!booking.checkOutDate) return false;
+      const checkOut = new Date(booking.checkOutDate);
+      checkOut.setHours(0, 0, 0, 0);
+      return checkOut >= today;
+    });
+
+    return activeBookings.map(booking => ({
       checkInDate: booking.checkInDate,
       checkOutDate: booking.checkOutDate,
       guestName: booking.userName || booking.name || 'Reserved',

@@ -7,7 +7,7 @@ const EnquiryCard = ({ enquiry, onCancel, showCancelButton = false }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  const statusColor = STATUS_COLORS[enquiry.status] || 'bg-neutral-100 text-neutral-800';
+  const statusColor = STATUS_COLORS[enquiry.status] || 'bg-neutral-500/10 text-neutral-400';
   
   const handleCancel = async () => {
     setCancelling(true);
@@ -21,116 +21,77 @@ const EnquiryCard = ({ enquiry, onCancel, showCancelButton = false }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
-      {/* Header */}
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-4">
+    <div className="glass-card rounded-3xl border border-neutral-200/80 dark:border-white/10 overflow-hidden shadow-lg p-6 flex flex-col justify-between">
+      <div>
+        <div className="flex items-start justify-between gap-3 mb-3">
           <div>
-            <h3 className="text-xl font-bold text-neutral-800 mb-1">
+            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-0.5">
               {enquiry.villaName}
             </h3>
-            <p className="text-sm text-neutral-500">
-              {formatDateTime(enquiry.createdAt)}
+            <p className="text-xs text-neutral-500">
+              Submitted: {formatDateTime(enquiry.createdAt)}
             </p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor} capitalize`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold capitalize ${statusColor}`}>
             {enquiry.status}
           </span>
         </div>
 
         {/* Quick Info */}
-        <div className="space-y-2 mb-4">
+        <div className="space-y-1.5 py-3 border-y border-neutral-200/60 dark:border-white/10 text-xs text-neutral-700 dark:text-neutral-300">
           {enquiry.checkInDate && (
-            <div className="flex items-center gap-2 text-sm text-neutral-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div className="flex items-center gap-2">
+              <span>📅</span>
               <span>
-                {formatDate(new Date(enquiry.checkInDate))}
-                {enquiry.checkOutDate && ` - ${formatDate(new Date(enquiry.checkOutDate))}`}
+                {formatDate(enquiry.checkInDate)}
+                {enquiry.checkOutDate && ` → ${formatDate(enquiry.checkOutDate)}`}
               </span>
             </div>
           )}
           
           {enquiry.numberOfGuests && (
-            <div className="flex items-center gap-2 text-sm text-neutral-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <span>{enquiry.numberOfGuests} Guest{enquiry.numberOfGuests > 1 ? 's' : ''}</span>
+            <div className="flex items-center gap-2">
+              <span>👥</span>
+              <span>{enquiry.numberOfGuests} Guests</span>
             </div>
           )}
         </div>
 
-        {/* Toggle Details Button */}
+        {/* Details Toggle */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="text-neutral-600 hover:text-neutral-800 text-sm font-medium flex items-center gap-1 transition-colors"
+          className="mt-3 text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:text-emerald-500 dark:hover:text-emerald-400 flex items-center gap-1 transition-colors"
         >
-          {showDetails ? 'Hide Details' : 'Show Details'}
-          <svg 
-            className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`}
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <span>{showDetails ? 'Hide Details' : 'View Message & Info'}</span>
+          <span className={`transition-transform ${showDetails ? 'rotate-180' : ''}`}>▼</span>
         </button>
-      </div>
 
-      {/* Expandable Details */}
-      {showDetails && (
-        <div className="px-6 pb-6 pt-0 border-t border-neutral-100">
-          <div className="mt-4 space-y-3">
+        {showDetails && (
+          <div className="mt-4 pt-3 border-t border-neutral-200/60 dark:border-white/10 text-xs space-y-2 animate-fade-in">
             <div>
-              <p className="text-xs font-semibold text-neutral-500 mb-1">Contact Information</p>
-              <p className="text-sm text-neutral-700">{enquiry.userName}</p>
-              <p className="text-sm text-neutral-600">{enquiry.email}</p>
-              <p className="text-sm text-neutral-600">{enquiry.phone}</p>
+              <span className="text-[10px] font-bold uppercase text-neutral-400 block">Contact Info</span>
+              <p className="text-neutral-800 dark:text-neutral-200">{enquiry.userName} • {enquiry.phone}</p>
+              <p className="text-neutral-500">{enquiry.email}</p>
             </div>
-
-            <div>
-              <p className="text-xs font-semibold text-neutral-500 mb-1">Message</p>
-              <p className="text-sm text-neutral-700 leading-relaxed">
-                {enquiry.message}
-              </p>
-            </div>
-
-            {/* Cancel Button - Only show for pending enquiries */}
-            {showCancelButton && onCancel && enquiry.status === 'pending' && (
-              <div className="pt-3">
-                <button
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {cancelling ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Cancelling...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Cancel Enquiry
-                    </>
-                  )}
-                </button>
-                <p className="text-xs text-neutral-500 text-center mt-2">
-                  Note: Only pending enquiries can be cancelled
-                </p>
+            {enquiry.message && (
+              <div>
+                <span className="text-[10px] font-bold uppercase text-neutral-400 block">Message</span>
+                <p className="text-neutral-700 dark:text-neutral-300 italic">&ldquo;{enquiry.message}&rdquo;</p>
               </div>
             )}
-
-            <div className="pt-3">
-              <p className="text-xs text-neutral-500">
-                Enquiry ID: {enquiry.id}
-              </p>
-            </div>
           </div>
+        )}
+      </div>
+
+      {showCancelButton && enquiry.status === 'pending' && (
+        <div className="mt-4 pt-3 border-t border-neutral-200/60 dark:border-white/10 flex justify-end">
+          <button
+            onClick={handleCancel}
+            disabled={cancelling}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-colors"
+          >
+            {cancelling ? 'Cancelling...' : 'Cancel Enquiry'}
+          </button>
         </div>
       )}
     </div>

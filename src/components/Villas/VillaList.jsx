@@ -1,23 +1,35 @@
+// src/components/Villas/VillaList.jsx
 import React, { useState, useEffect } from 'react';
 import { filterVillas } from '../../firebase/villaService';
 import VillaCard from './VillaCard';
 import VillaFilters from './VillaFilters';
 import Loading from '../Common/Loading';
 
-const VillaList = ({ onVillaClick }) => {
+const VillaList = ({ onVillaClick, initialFilters }) => {
   const [villas, setVillas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentFilters, setCurrentFilters] = useState({
-    location: 'all',
-    bedrooms: 'all',
-    minPrice: 0,
-    maxPrice: 50000
-  });
+  const [currentFilters, setCurrentFilters] = useState(() => ({
+    location: initialFilters?.location || 'all',
+    bedrooms: initialFilters?.bedrooms || 'all',
+    minPrice: initialFilters?.minPrice || 0,
+    maxPrice: initialFilters?.maxPrice || 50000
+  }));
 
   useEffect(() => {
-    loadVillas();
-  }, []);
+    if (initialFilters) {
+      const merged = {
+        location: initialFilters.location || 'all',
+        bedrooms: initialFilters.bedrooms || 'all',
+        minPrice: initialFilters.minPrice || 0,
+        maxPrice: initialFilters.maxPrice || 50000
+      };
+      setCurrentFilters(merged);
+      loadVillas(merged);
+    } else {
+      loadVillas(currentFilters);
+    }
+  }, [initialFilters]);
 
   const loadVillas = async (filters = currentFilters) => {
     try {
@@ -51,12 +63,12 @@ const VillaList = ({ onVillaClick }) => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass-card rounded-3xl p-8 max-w-md text-center border border-neutral-200 dark:border-white/10 shadow-xl">
+          <p className="text-sm font-semibold text-rose-500 mb-4">{error}</p>
           <button
             onClick={() => loadVillas()}
-            className="px-6 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700"
+            className="px-6 py-2.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold text-xs"
           >
             Try Again
           </button>
@@ -66,66 +78,69 @@ const VillaList = ({ onVillaClick }) => {
   }
 
   return (
-    <section id="properties" className="py-16 min-h-screen">
-      <div className="container mx-auto px-4">
+    <section id="properties" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-neutral-800 mb-4">
-            Explore Our <span className="text-neutral-600">Villas</span>
-          </h1>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-            Find your perfect getaway from our handpicked collection of luxury villas and homestays
-          </p>
+        <div className="mb-10 text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-500/10 text-brand-600 dark:text-rose-300 border border-brand-500/20 mb-2">
+              ✦ Handcrafted Getaways
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-neutral-900 dark:text-white tracking-tight font-serif">
+              Explore Our Collection
+            </h1>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 max-w-xl">
+              Verified villas and private homestays across Lonavala & Mahabaleshwar
+            </p>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <VillaFilters 
-              onFilterChange={handleFilterChange}
-              onReset={handleReset}
-            />
-          </div>
+        {/* Filters Bar */}
+        <VillaFilters 
+          initialFilters={currentFilters}
+          onFilterChange={handleFilterChange}
+          onReset={handleReset}
+        />
 
-          {/* Villa Grid */}
-          <div className="lg:col-span-3">
-            {loading ? (
-              <Loading text="Loading villas..." />
-            ) : villas.length === 0 ? (
-              <div className="text-center py-12">
-                <svg className="w-24 h-24 mx-auto text-neutral-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <h3 className="text-xl font-semibold text-neutral-700 mb-2">No villas found</h3>
-                <p className="text-neutral-600 mb-4">Try adjusting your filters to see more results</p>
-                <button
-                  onClick={handleReset}
-                  className="px-6 py-2 bg-neutral-800 text-white rounded-lg hover:bg-neutral-700"
-                >
-                  Reset Filters
-                </button>
+        {/* Villa Grid */}
+        <div>
+          {loading ? (
+            <Loading text="Refreshing villa catalog..." />
+          ) : villas.length === 0 ? (
+            <div className="text-center py-20 glass-card rounded-3xl border border-neutral-200 dark:border-white/10 p-8">
+              <span className="text-4xl block mb-3">🏡</span>
+              <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-200 mb-1">
+                No matching villas found
+              </h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-6">
+                Try widening your price range or switching the location filter.
+              </p>
+              <button
+                onClick={handleReset}
+                className="px-6 py-2.5 rounded-xl bg-emerald-500 text-neutral-950 font-bold text-xs shadow-md"
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="mb-6 flex items-center justify-between text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                <p>
+                  Displaying <span className="text-neutral-900 dark:text-white font-bold">{villas.length}</span> curated properties
+                </p>
               </div>
-            ) : (
-              <>
-                <div className="mb-6 flex items-center justify-between">
-                  <p className="text-neutral-600">
-                    Found <span className="font-semibold text-neutral-800">{villas.length}</span> villa{villas.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {villas.map((villa) => (
-                    <VillaCard 
-                      key={villa.id} 
-                      villa={villa} 
-                      onClick={onVillaClick}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {villas.map((villa) => (
+                  <VillaCard 
+                    key={villa.id} 
+                    villa={villa} 
+                    onClick={onVillaClick}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>

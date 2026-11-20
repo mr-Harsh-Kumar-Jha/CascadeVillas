@@ -1,8 +1,6 @@
 // src/components/Booking/BookingCalendar.jsx
-
 import React, { useState, useEffect } from 'react';
 import { getBlockedDates } from '../../firebase/bookingService';
-import MetaTags from '../Common/MetaTags';
 
 const BookingCalendar = ({ villaId, compact = false }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -44,7 +42,6 @@ const BookingCalendar = ({ villaId, compact = false }) => {
       checkIn.setHours(0, 0, 0, 0);
       checkOut.setHours(0, 0, 0, 0);
       date.setHours(0, 0, 0, 0);
-      // Include checkout day as blocked
       return date >= checkIn && date < checkOut;
     });
   };
@@ -56,7 +53,6 @@ const BookingCalendar = ({ villaId, compact = false }) => {
       checkIn.setHours(0, 0, 0, 0);
       checkOut.setHours(0, 0, 0, 0);
       date.setHours(0, 0, 0, 0);
-      // Include checkout day as blocked
       return date >= checkIn && date < checkOut;
     });
   };
@@ -69,11 +65,21 @@ const BookingCalendar = ({ villaId, compact = false }) => {
   const isPastDate = (date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    date.setHours(0, 0, 0, 0);
-    return date < today;
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d < today;
+  };
+
+  const canGoPrevious = () => {
+    const today = new Date();
+    return (
+      currentMonth.getFullYear() > today.getFullYear() ||
+      (currentMonth.getFullYear() === today.getFullYear() && currentMonth.getMonth() > today.getMonth())
+    );
   };
 
   const previousMonth = () => {
+    if (!canGoPrevious()) return;
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   };
 
@@ -85,37 +91,36 @@ const BookingCalendar = ({ villaId, compact = false }) => {
     const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
     const days = [];
 
-    // Add empty cells for days before the first of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(
         <div key={`empty-${i}`} className="aspect-square"></div>
       );
     }
 
-    // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
-      const blocked = isDateBlocked(date);
-      const today = isToday(date);
       const past = isPastDate(date);
-      const bookingInfo = getBookingInfo(date);
+      // Auto-clear past bookings: only current/future days can be blocked
+      const blocked = !past && isDateBlocked(date);
+      const today = isToday(date);
+      const bookingInfo = blocked ? getBookingInfo(date) : null;
 
       days.push(
         <div
           key={day}
-          className={`aspect-square flex items-center justify-center rounded-lg text-sm relative cursor-pointer transition-all
-            ${blocked ? 'bg-red-100 text-red-700 font-semibold hover:bg-red-200' : ''}
-            ${!blocked && !past ? 'bg-green-50 text-green-700 hover:bg-green-100' : ''}
-            ${past && !blocked ? 'bg-neutral-50 text-neutral-400' : ''}
-            ${today ? 'ring-2 ring-neutral-800' : ''}
-            ${compact ? 'text-xs' : ''}
-          `}
+          className={`aspect-square flex items-center justify-center rounded-xl text-xs font-semibold relative transition-all ${
+            past
+              ? 'text-neutral-400 dark:text-neutral-600 opacity-40 cursor-default'
+              : blocked 
+                ? 'bg-rose-500/20 text-rose-500 border border-rose-500/30 cursor-not-allowed' 
+                : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border border-emerald-500/20 cursor-pointer'
+          } ${today ? 'ring-2 ring-emerald-500 font-black' : ''}`}
           onMouseEnter={() => setHoveredDate(bookingInfo)}
           onMouseLeave={() => setHoveredDate(null)}
         >
           {day}
           {blocked && !compact && (
-            <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-500"></div>
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-rose-500" />
           )}
         </div>
       );
@@ -134,92 +139,73 @@ const BookingCalendar = ({ villaId, compact = false }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-800"></div>
+        <div className="w-6 h-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className={`bg-white ${compact ? 'p-3' : 'p-6'} rounded-lg border border-neutral-200`}>
-      {/* Header */}
+    <div className={`glass-panel rounded-2xl ${compact ? 'p-3' : 'p-6'} border border-neutral-200/80 dark:border-white/10 shadow-sm`}>
+      {/* Month Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={previousMonth}
-          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          disabled={!canGoPrevious()}
+          className={`p-2 rounded-xl transition-all ${
+            canGoPrevious()
+              ? 'hover:bg-neutral-200/60 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 cursor-pointer active:scale-95'
+              : 'opacity-25 text-neutral-400 dark:text-neutral-600 cursor-not-allowed'
+          }`}
+          title={canGoPrevious() ? 'Previous Month' : 'Past months cleared'}
+          aria-label="Previous Month"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
+          ←
         </button>
         
-        <h3 className={`font-bold text-neutral-800 ${compact ? 'text-sm' : 'text-lg'}`}>
+        <h3 className={`font-bold text-neutral-900 dark:text-white ${compact ? 'text-xs' : 'text-sm'}`}>
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h3>
         
         <button
           onClick={nextMonth}
-          className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          className="p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 transition-all cursor-pointer active:scale-95"
+          title="Next Month"
+          aria-label="Next Month"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
+          →
         </button>
       </div>
 
-      {/* Day names */}
-      <div className={`grid grid-cols-7 gap-1 mb-2 ${compact ? 'mb-1' : 'mb-2'}`}>
+      {/* Week Day Header */}
+      <div className="grid grid-cols-7 gap-1 mb-2 text-center text-[10px] font-bold text-neutral-400 uppercase">
         {dayNames.map(day => (
-          <div
-            key={day}
-            className={`text-center font-semibold text-neutral-600 ${compact ? 'text-xs' : 'text-sm'}`}
-          >
-            {compact ? day.charAt(0) : day}
-          </div>
+          <div key={day}>{compact ? day.charAt(0) : day}</div>
         ))}
       </div>
 
-      {/* Calendar grid */}
-      <div className={`grid grid-cols-7 gap-1 ${compact ? 'gap-0.5' : 'gap-1'}`}>
+      {/* Days Grid */}
+      <div className="grid grid-cols-7 gap-1">
         {renderCalendar()}
       </div>
 
       {/* Legend */}
-      <div className={`mt-4 pt-4 border-t border-neutral-200 flex ${compact ? 'flex-col gap-2' : 'flex-wrap gap-4'}`}>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-green-50 border border-green-200"></div>
-          <span className={`text-neutral-600 ${compact ? 'text-xs' : 'text-sm'}`}>Available</span>
+      <div className="mt-4 pt-4 border-t border-neutral-200/60 dark:border-white/10 flex items-center justify-center gap-6 text-[11px] font-semibold">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span className="text-neutral-600 dark:text-neutral-400">Available</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-100 border border-red-200"></div>
-          <span className={`text-neutral-600 ${compact ? 'text-xs' : 'text-sm'}`}>Booked</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-neutral-50 border border-neutral-200"></div>
-          <span className={`text-neutral-600 ${compact ? 'text-xs' : 'text-sm'}`}>Past</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+          <span className="text-neutral-600 dark:text-neutral-400">Reserved</span>
         </div>
       </div>
 
-      {/* Booking info tooltip */}
       {hoveredDate && !compact && (
-        <div className="mt-4 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-          <p className="text-sm font-semibold text-neutral-800">
-            {new Date(hoveredDate.checkInDate).toLocaleDateString()} - {new Date(hoveredDate.checkOutDate).toLocaleDateString()}
+        <div className="mt-3 p-3 rounded-xl bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
+          <p className="font-bold text-neutral-900 dark:text-white">
+            {new Date(hoveredDate.checkInDate).toLocaleDateString()} → {new Date(hoveredDate.checkOutDate).toLocaleDateString()}
           </p>
-          <p className="text-xs text-neutral-600 mt-1">
-            {hoveredDate.bookingType === 'offline' ? 'Offline Booking' : 'Online Booking'}
-          </p>
-          {hoveredDate.guestName && hoveredDate.guestName !== 'Reserved' && (
-            <p className="text-xs text-neutral-600">Guest: {hoveredDate.guestName}</p>
-          )}
-        </div>
-      )}
-
-      {/* Summary */}
-      {!compact && blockedDates.length > 0 && (
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <span className="font-semibold">{blockedDates.length}</span> booking{blockedDates.length !== 1 ? 's' : ''} found
-          </p>
+          <p className="text-neutral-500 mt-0.5">{hoveredDate.reason || 'Reserved Booking'}</p>
         </div>
       )}
     </div>

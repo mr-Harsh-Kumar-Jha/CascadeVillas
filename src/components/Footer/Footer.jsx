@@ -1,6 +1,7 @@
 // src/components/Footer/Footer.jsx
 import React from 'react';
 import HologramBadge from '../Common/HologramBadge';
+import CascadeLogo from '../../assets/Cascade.jpg';
 import { CONCIERGE_INFO } from '../../utils/constants';
 
 const Footer = ({ onNavigate }) => {
@@ -11,15 +12,15 @@ const Footer = ({ onNavigate }) => {
           {/* Brand Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 via-rose-500 to-amber-500 flex items-center justify-center text-white font-serif font-bold text-lg shadow-md">
-                C
+              <div className="h-10 w-14 rounded-xl overflow-hidden bg-[#F5F5DD] p-0.5 border border-neutral-200/80 dark:border-white/15 shadow-sm flex items-center justify-center shrink-0">
+                <img className="w-full h-full object-contain rounded-lg" src={CascadeLogo} alt="Cascade Villas" />
               </div>
               <div className="leading-tight">
                 <span className="font-serif font-black tracking-wider text-neutral-900 dark:text-white text-base block">
                   CASCADE VILLAS
                 </span>
                 <span className="text-[10px] tracking-widest text-neutral-500 dark:text-neutral-400 uppercase font-semibold">
-                  Luxury Homestays
+                  Villas &amp; Homestays
                 </span>
               </div>
             </div>
@@ -79,7 +80,7 @@ const Footer = ({ onNavigate }) => {
                   onClick={() => onNavigate('properties')} 
                   className="hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
                 >
-                  All Luxury Villas
+                  All Villas
                 </button>
               </li>
               <li>

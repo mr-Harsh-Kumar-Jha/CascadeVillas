@@ -70,19 +70,23 @@ export const getCurrentUser = () => {
   return auth.currentUser;
 };
 
-// Get error message
-export const getAuthErrorMessage = (errorCode) => {
+// Get error message with friendly details and troubleshooting hints
+export const getAuthErrorMessage = (errorCode, defaultMessage = '') => {
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+
   switch (errorCode) {
+    case 'auth/unauthorized-domain':
+      return `This domain (${currentHost || 'current domain'}) is not authorized in Firebase Authentication. Please add "${currentHost}" in Firebase Console → Authentication → Settings → Authorized domains.`;
     case 'auth/email-already-in-use':
       return 'This email is already registered. Please sign in instead.';
     case 'auth/invalid-email':
-      return 'Invalid email address.';
+      return 'Invalid email address format.';
     case 'auth/operation-not-allowed':
-      return 'Operation not allowed. Please contact support.';
+      return 'Sign-in method is not enabled in Firebase Authentication Console.';
     case 'auth/weak-password':
       return 'Password is too weak. Use at least 6 characters.';
     case 'auth/user-disabled':
-      return 'This account has been disabled.';
+      return 'This account has been disabled by the administrator.';
     case 'auth/user-not-found':
       return 'No account found with this email.';
     case 'auth/wrong-password':
@@ -90,8 +94,21 @@ export const getAuthErrorMessage = (errorCode) => {
     case 'auth/invalid-credential':
       return 'Invalid email or password.';
     case 'auth/popup-closed-by-user':
-      return 'Sign-in popup was closed. Please try again.';
+      return 'Sign-in popup was closed before completing verification.';
+    case 'auth/popup-blocked':
+      return 'The sign-in popup was blocked by your browser. Please allow popups for this site.';
+    case 'auth/cancelled-popup-request':
+      return 'Sign-in popup process was cancelled.';
+    case 'auth/network-request-failed':
+      return 'Network connection failed. Please check your internet connection.';
+    case 'auth/too-many-requests':
+      return 'Access temporarily blocked due to too many failed attempts. Please try again later.';
     default:
-      return 'An error occurred. Please try again.';
+      if (defaultMessage) {
+        return `${defaultMessage} (${errorCode || 'auth-error'})`;
+      }
+      return errorCode 
+        ? `Authentication failed (${errorCode}). Please try again.`
+        : 'An error occurred. Please try again.';
   }
 };

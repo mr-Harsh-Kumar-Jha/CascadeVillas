@@ -78,9 +78,9 @@ const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
               className={`flex items-center gap-3 cursor-pointer group ${isCollapsed ? 'justify-center' : ''}`}
               title="Cascade Villas - Home"
             >
-              <div className="relative w-10 h-10 rounded-2xl overflow-hidden p-[1.5px] bg-gradient-to-tr from-brand-500 via-amber-400 to-emerald-400 shadow group-hover:scale-105 transition-transform shrink-0">
+              <div className="h-10 w-14 rounded-xl overflow-hidden bg-[#F5F5DD] shadow-sm border border-neutral-200/80 dark:border-white/15 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
                 <img 
-                  className="w-full h-full object-cover rounded-[14px]" 
+                  className="w-full h-full object-contain rounded-lg" 
                   src={CascadeLogo} 
                   alt="Cascade Villas"
                 />
@@ -88,15 +88,10 @@ const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
 
               {!isCollapsed && (
                 <div className="truncate text-left">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base font-bold tracking-tight text-neutral-900 dark:text-white font-serif">
-                      Cascade
-                    </span>
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 rounded bg-brand-500/10 text-brand-600 dark:text-rose-300 border border-brand-500/20">
-                      LUXURY
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+                  <h1 className="text-base font-bold tracking-tight text-neutral-900 dark:text-white font-serif leading-tight">
+                    Cascade
+                  </h1>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium leading-tight">
                     Villas & Homestays
                   </p>
                 </div>
@@ -299,18 +294,13 @@ const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
             onClick={() => onNavigate('home')}
             className="flex items-center gap-2.5 cursor-pointer active:scale-95 transition-transform"
           >
-            <div className="w-8 h-8 rounded-xl overflow-hidden p-[1px] bg-gradient-to-tr from-brand-500 via-amber-400 to-emerald-400 shadow">
-              <img className="w-full h-full object-cover rounded-[10px]" src={CascadeLogo} alt="Cascade"/>
+            <div className="h-9 w-12 rounded-lg overflow-hidden bg-[#F5F5DD] p-0.5 border border-neutral-200/80 dark:border-white/15 shadow-sm flex items-center justify-center shrink-0">
+              <img className="w-full h-full object-contain rounded-md" src={CascadeLogo} alt="Cascade Villas"/>
             </div>
-            <div className="leading-tight">
-              <div className="flex items-center gap-1.5">
-                <span className="font-serif font-bold text-sm text-neutral-900 dark:text-white">
-                  Cascade
-                </span>
-                <span className="text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.2 rounded bg-brand-500/10 text-brand-600 dark:text-rose-300 border border-brand-500/20">
-                  LUXURY
-                </span>
-              </div>
+            <div className="leading-tight text-left">
+              <span className="font-serif font-bold text-sm text-neutral-900 dark:text-white block">
+                Cascade
+              </span>
               <p className="text-[9px] text-neutral-500 dark:text-neutral-400 font-medium">
                 Villas &amp; Homestays
               </p>
@@ -508,15 +498,15 @@ const Navigation = ({ currentPage, onNavigate, user, isAdmin }) => {
             {/* Header & User Info */}
             <div className="flex items-center justify-between pb-3 border-b border-neutral-200/60 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 via-amber-400 to-emerald-400 flex items-center justify-center text-white font-serif font-black text-lg shadow">
-                  C
+                <div className="h-10 w-14 rounded-xl overflow-hidden bg-[#F5F5DD] p-0.5 border border-neutral-200/80 dark:border-white/15 shadow-sm flex items-center justify-center shrink-0">
+                  <img className="w-full h-full object-contain rounded-lg" src={CascadeLogo} alt="Cascade Villas"/>
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-neutral-900 dark:text-white">
                     Cascade Villas
                   </h3>
                   <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                    {user ? (isAdmin ? 'Logged in as Admin' : `Guest: ${user.displayName || user.email}`) : 'Luxury Homestays & Pool Estates'}
+                    {user ? (isAdmin ? 'Logged in as Admin' : `Guest: ${user.displayName || user.email}`) : 'Villas & Homestays'}
                   </p>
                 </div>
               </div>

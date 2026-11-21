@@ -71,8 +71,8 @@ const AuthPage = ({ onSuccess, onBack }) => {
       onSuccess();
     } catch (error) {
       console.error('Auth error:', error);
-      const errorMessage = getAuthErrorMessage(error.code);
-      setErrors({ general: errorMessage });
+      const errorMessage = getAuthErrorMessage(error.code, error.message);
+      setErrors({ general: errorMessage, code: error.code });
     } finally {
       setLoading(false);
     }
@@ -86,8 +86,8 @@ const AuthPage = ({ onSuccess, onBack }) => {
       onSuccess();
     } catch (error) {
       console.error('Google sign in error:', error);
-      const errorMessage = getAuthErrorMessage(error.code);
-      setErrors({ general: errorMessage });
+      const errorMessage = getAuthErrorMessage(error.code, error.message);
+      setErrors({ general: errorMessage, code: error.code });
     } finally {
       setLoading(false);
     }
@@ -118,14 +118,14 @@ const AuthPage = ({ onSuccess, onBack }) => {
         <div className="glass-panel rounded-3xl p-8 border border-neutral-200/80 dark:border-white/15 shadow-2xl backdrop-blur-2xl">
           {/* Logo & Brand */}
           <div className="text-center mb-6">
-            <div className="w-14 h-14 mx-auto rounded-2xl overflow-hidden p-[2px] bg-gradient-to-tr from-brand-500 via-amber-400 to-emerald-400 shadow-lg mb-3">
-              <img className="w-full h-full object-cover rounded-[14px]" src={CascadeLogo} alt="Cascade" />
+            <div className="h-12 w-16 mx-auto rounded-2xl overflow-hidden p-1 bg-[#F5F5DD] shadow-lg mb-3 border border-neutral-200/80 dark:border-white/15 flex items-center justify-center">
+              <img className="w-full h-full object-contain rounded-xl" src={CascadeLogo} alt="Cascade Villas" />
             </div>
             <h1 className="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">
               {isLogin ? 'Sign In to Cascade Villas' : 'Create Guest Account'}
             </h1>
             <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-              {isLogin ? 'Access your inquiries, booking history, and admin console' : 'Join us for verified luxury retreats & special rates'}
+              {isLogin ? 'Access your inquiries, booking history, and admin console' : 'Join us for verified holiday stays & special rates'}
             </p>
           </div>
 
@@ -136,8 +136,37 @@ const AuthPage = ({ onSuccess, onBack }) => {
 
           {/* Error Message */}
           {errors.general && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 text-xs font-medium">
-              ⚠️ {errors.general}
+            <div className="mb-5 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-500 text-xs font-medium space-y-2.5">
+              <div className="flex items-start gap-2">
+                <span className="shrink-0 text-sm">⚠️</span>
+                <span className="leading-relaxed">{errors.general}</span>
+              </div>
+
+              {errors.code === 'auth/unauthorized-domain' && (
+                <div className="pt-2.5 border-t border-rose-500/20 text-neutral-300 text-[11px] space-y-2">
+                  <div className="font-bold text-amber-400 flex items-center gap-1.5">
+                    <span>🛡️</span>
+                    <span>1-Step Fix in Firebase Console</span>
+                  </div>
+                  <p className="text-neutral-400 leading-relaxed">
+                    Firebase blocks OAuth &amp; sign-ins from domains that are not explicitly authorized.
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-neutral-300 font-mono text-[10px]">
+                    <li>Open Firebase Console &rarr; Auth Settings</li>
+                    <li>Under <strong>Authorized domains</strong>, click <strong>Add domain</strong></li>
+                    <li>Add: <span className="text-emerald-400 font-bold">{typeof window !== 'undefined' ? window.location.hostname : 'cascadevillas.in'}</span></li>
+                  </ol>
+                  <a
+                    href="https://console.firebase.google.com/project/cascadevillas/authentication/settings"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs transition-all shadow-md"
+                  >
+                    <span>Open Firebase Auth Settings</span>
+                    <span>↗</span>
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
